@@ -1,5 +1,5 @@
 import { constant, flow, identity, pipe } from 'fp-ts/function'
-import { mapTo, symbol } from './parser'
+import { andThen, delimited, mapTo, optional, pair, symbol } from './parser'
 
 export const start = mapTo(symbol('^'), constant({ tag: 'Start' } as Expr))
 export const end = mapTo(symbol('$'), constant({ tag: 'End' } as Expr))
@@ -26,6 +26,16 @@ type Expr =
   | { tag: 'Bool' }
   | { tag: 'Truthy' }
   | { tag: 'Falsey' }
+
+export const expressionP = symbol('fuck')
+
+export const parser = pair(
+  pair(
+    optional(start),
+    expressionP,
+  ),
+  optional(end),
+)
 
 /*
 

@@ -9,7 +9,9 @@ import {
   whitespaces0,
   delimited,
   symbol,
+  optional,
 } from '../src/parser'
+import { parser } from '../src'
 
 describe('Foobar', () => {
   it('should do shit', () => {
@@ -25,5 +27,9 @@ describe('Foobar', () => {
     expect(delimited(whitespaces0, integer, whitespaces0)(' 2 0 ')).toEqual(
       right([2, '0 '])
     )
+  })
+
+  it('should maybeshut', () => {
+    console.log(JSON.stringify(parser('fuck'), null, 2))
   })
 })

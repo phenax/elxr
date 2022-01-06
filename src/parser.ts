@@ -1,5 +1,6 @@
 import { flow, pipe } from 'fp-ts/function'
-import { Either, left, right, map, chain, orElse } from 'fp-ts/Either'
+import { Either, left, right, map, chain, orElse, fold } from 'fp-ts/Either'
+import { none, some, Option } from 'fp-ts/lib/Option'
 
 export type char = string
 
@@ -117,3 +118,24 @@ export const mapTo = <I, R>(p: Parser<I>, f: (p: I) => R): Parser<R> =>
     p,
     map(([v, inp]) => [f(v), inp])
   )
+
+export const andThen = <I, R>(f: (p: I) => Parser<R>) => (p: Parser<I>): Parser<R> =>
+  flow(
+    p,
+    chain(([v, inp]) => f(v)(inp)),
+  )
+
+export const optional = <T>(p: Parser<T>): Parser<Option<T>> =>
+  flow(
+    p,
+    fold(
+      ([_, inp]) => right([none, inp]),
+      ([v, inp]) => right([some(v), inp])
+    )
+  )
+
+export const pair = <A, B>(a: Parser<A>, b: Parser<B>): Parser<[A, B]> => pipe(
+  a,
+  andThen(ra => mapTo(b, rb => [ra, rb]))
+)
+
