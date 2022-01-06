@@ -6,7 +6,7 @@ esbuild
     outdir: 'lib',
     bundle: true,
     sourcemap: true,
-    minify: false,
+    minify: true,
     splitting: false,
     format: 'esm',
     target: ['esnext']

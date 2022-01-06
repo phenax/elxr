@@ -1,10 +1,13 @@
 import { constant, flow, identity, pipe } from 'fp-ts/function'
-import {mapTo, symbol} from './parser'
+import { mapTo, symbol } from './parser'
 
 export const start = mapTo(symbol('^'), constant({ tag: 'Start' } as Expr))
 export const end = mapTo(symbol('$'), constant({ tag: 'End' } as Expr))
 export const anyItem = mapTo(symbol(','), constant({ tag: 'AnyItem' } as Expr))
-export const nextItem = mapTo(symbol(','), constant({ tag: 'NextItem' } as Expr))
+export const nextItem = mapTo(
+  symbol(','),
+  constant({ tag: 'NextItem' } as Expr)
+)
 // export const optional = mapTo(symbol('?'), constant({ tag: 'Optional' } as Expr))
 // export const zeroOrMore = mapTo(symbol('*'), constant({ tag: 'ZeroOrMore' } as Expr))
 // export const oneOrMore = mapTo(symbol('+'), constant({ tag: 'OneOrMore' } as Expr))
@@ -45,4 +48,3 @@ type Expr =
 /x/ => match regular expression (string values in list)
 
 */
-
