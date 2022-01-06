@@ -1,0 +1,19 @@
+{
+  "name": "list-exp",
+  "version": "0.0.0",
+  "description": "__",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "repository": "https://github.com/phenax/list-exp.git",
+  "author": "Akshay Nair <phenax5@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "tsc": "tsc --emitDeclarationOnly --outDir lib",
+    "build": "rimraf lib && node ./esbuild.js && npm run tsc"
+  },
+  "devDependencies": {
+    "esbuild": "^0.14.10",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.5.4"
+  }
+}
