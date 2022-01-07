@@ -12,6 +12,7 @@ import {
   optional,
 } from '../src/parser'
 import { parser } from '../src'
+import {some} from 'fp-ts/lib/Option'
 
 describe('Foobar', () => {
   it('should do shit', () => {
@@ -30,6 +31,19 @@ describe('Foobar', () => {
   })
 
   it('should maybeshut', () => {
-    console.log(JSON.stringify(parser('fuck'), null, 2))
+    expect(parser(/^ .\s(\n)\b  \T $/.source)).toEqual(right([
+      [
+        some({ tag: 'Start' }),
+        [
+          { tag: 'AnyItem' },
+          { tag: 'AnyString' },
+          { tag: 'Group', exprs: [{ tag: 'AnyNumber' },] },
+          { tag: 'AnyBool' },
+          { tag: 'Truthy' },
+        ],
+        some({ tag: 'End' }),
+      ],
+      ''
+    ]))
   })
 })

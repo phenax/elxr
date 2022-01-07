@@ -90,15 +90,12 @@ export const tab = matchChar('\t')
 export const whitespace = or([space, newline, tab])
 export const whitespaces0 = many0(whitespace)
 
-export const matchString = (s: string): Parser<string> =>
-  s === ''
-    ? constP('')
-    : flow(
-        matchChar(s.charAt(0)),
-        chain(([c, inp]) =>
-          pipe(inp, matchString(s.slice(1)), map(mapFst((s) => c + s)))
-        )
-      )
+export const matchString =
+  (s: string): Parser<string> =>
+  (input: string) =>
+    input.slice(0, s.length) === s
+      ? right([s, input.slice(s.length)])
+      : left([`Expected ${s} but got ${input.slice(0, 1)}`, input])
 
 export const symbol = (s: string): Parser<string> =>
   delimited(whitespaces0, matchString(s), whitespaces0)
@@ -131,3 +128,9 @@ export const pair = <A, B>(a: Parser<A>, b: Parser<B>): Parser<[A, B]> =>
     a,
     andThen((ra) => mapTo(b, (rb) => [ra, rb]))
   )
+
+export const tuple3 = <A, B, C>(
+  a: Parser<A>,
+  b: Parser<B>,
+  c: Parser<C>
+): Parser<[A, B, C]> => mapTo(pair(pair(a, b), c), ([[a, b], c]) => [a, b, c])
