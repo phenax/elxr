@@ -1,18 +1,12 @@
 import { left, right } from 'fp-ts/Either'
 import {
-  many0,
-  digit,
   integer,
   whitespace,
-  suffixed,
-  prefixed,
   whitespaces0,
   delimited,
-  symbol,
-  optional,
-} from '../src/parser'
-import { parser } from '../src'
-import {some} from 'fp-ts/lib/Option'
+} from '../src/parser/utils'
+import { parser } from '../src/parser'
+import { some } from 'fp-ts/Option'
 
 describe('Foobar', () => {
   it('should do shit', () => {
@@ -31,32 +25,36 @@ describe('Foobar', () => {
   })
 
   it('should maybeshut', () => {
-    expect(parser(/^ .\s(\n)\b  \T $/.source)).toEqual(right([
-      [
-        some({ tag: 'Start' }),
+    expect(parser(/^ .\s(\n)\b  \T $/.source)).toEqual(
+      right([
         [
-          { tag: 'AnyItem' },
-          { tag: 'AnyString' },
-          { tag: 'Group', exprs: [{ tag: 'AnyNumber' },] },
-          { tag: 'AnyBool' },
-          { tag: 'Truthy' },
+          some({ tag: 'Start' }),
+          [
+            { tag: 'AnyItem' },
+            { tag: 'AnyString' },
+            { tag: 'Group', exprs: [{ tag: 'AnyNumber' }] },
+            { tag: 'AnyBool' },
+            { tag: 'Truthy' },
+          ],
+          some({ tag: 'End' }),
         ],
-        some({ tag: 'End' }),
-      ],
-      ''
-    ]))
+        '',
+      ])
+    )
 
-    expect(parser(/^ \s* \T? \n+ $/.source)).toEqual(right([
-      [
-        some({ tag: 'Start' }),
+    expect(parser(/^ \s* \T? \n+ $/.source)).toEqual(
+      right([
         [
-          { tag: 'ZeroOrMore', expr: { tag: 'AnyString' } },
-          { tag: 'Optional', expr: { tag: 'Truthy' } },
-          { tag: 'OneOrMore', expr: { tag: 'AnyNumber' } },
+          some({ tag: 'Start' }),
+          [
+            { tag: 'ZeroOrMore', expr: { tag: 'AnyString' } },
+            { tag: 'Optional', expr: { tag: 'Truthy' } },
+            { tag: 'OneOrMore', expr: { tag: 'AnyNumber' } },
+          ],
+          some({ tag: 'End' }),
         ],
-        some({ tag: 'End' }),
-      ],
-      ''
-    ]))
+        '',
+      ])
+    )
   })
 })

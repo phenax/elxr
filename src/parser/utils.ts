@@ -11,7 +11,7 @@ import {
 } from 'fp-ts/Either'
 import { none, some, Option } from 'fp-ts/Option'
 import { mapFst, mapSnd, snd } from 'fp-ts/Tuple'
-import { eq } from './utils'
+import { eq } from '../utils'
 
 export type char = string
 
