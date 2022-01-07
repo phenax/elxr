@@ -1,16 +1,14 @@
-import { constant, flow, identity, pipe } from 'fp-ts/function'
+import { constant, pipe } from 'fp-ts/function'
+import { chain, fold, right } from 'fp-ts/lib/Either'
+import { match } from './utils'
 import {
-  andThen,
   delimited,
-  digit,
-  integer,
   many1,
   mapTo,
-  matchChar,
   optional,
   or,
-  pair,
   Parser,
+  ParserResult,
   symbol,
   tuple3,
 } from './parser'
@@ -36,16 +34,13 @@ export const anyBool = mapTo(
 )
 export const truthy = mapTo(symbol('\\T'), constant({ tag: 'Truthy' } as Expr))
 export const falsey = mapTo(symbol('\\F'), constant({ tag: 'Falsey' } as Expr))
-// export const optional = mapTo(symbol('?'), constant({ tag: 'Optional' } as Expr))
-// export const zeroOrMore = mapTo(symbol('*'), constant({ tag: 'ZeroOrMore' } as Expr))
-// export const oneOrMore = mapTo(symbol('+'), constant({ tag: 'OneOrMore' } as Expr))
 
 type Expr =
   | { tag: 'Start' }
   | { tag: 'End' }
-  | { tag: 'Optional' }
-  | { tag: 'OneOrMore' }
-  | { tag: 'ZeroOrMore' }
+  | { tag: 'Optional'; expr: Expr }
+  | { tag: 'OneOrMore'; expr: Expr }
+  | { tag: 'ZeroOrMore'; expr: Expr }
   | { tag: 'NextItem' }
   | { tag: 'AnyItem' }
   | { tag: 'Or' }
@@ -56,13 +51,35 @@ type Expr =
   | { tag: 'Falsey' }
   | { tag: 'Group'; exprs: Expr[] }
 
+export const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
+  chain(([expr, input]) =>
+    pipe(
+      input,
+      or([symbol('*'), symbol('+'), symbol('?')]),
+      fold(
+        () => right([expr, input]),
+        ([c, inp]) =>
+          pipe(
+            c,
+            match<Expr, string>({
+              '*': () => ({ tag: 'ZeroOrMore', expr }),
+              '+': () => ({ tag: 'OneOrMore', expr }),
+              '?': () => ({ tag: 'Optional', expr }),
+              _: () => expr,
+            }),
+            (ex) => right([ex, inp])
+          )
+      )
+    )
+  )
+
 export const expressionP: Parser<Expr> = (input: string) =>
   pipe(
     input,
     or([
       mapTo(
         delimited(symbol('('), many1(expressionP), symbol(')')),
-        (exprs) => ({ tag: 'Group', exprs })
+        (exprs) => ({ tag: 'Group', exprs } as Expr)
       ),
       nextItem,
       anyItem,
@@ -71,27 +88,17 @@ export const expressionP: Parser<Expr> = (input: string) =>
       anyBool,
       truthy,
       falsey,
-    ])
+    ]),
+    wrapQuantifiers
   )
 
 export const parser = tuple3(optional(start), many1(expressionP), optional(end))
 
 /*
 
-^ $ => start and end of list
-? => optional
-. => any item
-* => 0 or more instances
-+ => 1 or more instances
 {3,6} => 3 to 6 instances
-\s => string
-\n => number
-\b => boolean
-\T => truthy
-\F => falsey
 (> 5) => number greater than
 (< 5) => number less than
-, => followed by
 [name x] => apply x on property `name`
 | => or
 /x/ => match regular expression (string values in list)

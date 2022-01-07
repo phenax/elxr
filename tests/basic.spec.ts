@@ -45,5 +45,18 @@ describe('Foobar', () => {
       ],
       ''
     ]))
+
+    expect(parser(/^ \s* \T? \n+ $/.source)).toEqual(right([
+      [
+        some({ tag: 'Start' }),
+        [
+          { tag: 'ZeroOrMore', expr: { tag: 'AnyString' } },
+          { tag: 'Optional', expr: { tag: 'Truthy' } },
+          { tag: 'OneOrMore', expr: { tag: 'AnyNumber' } },
+        ],
+        some({ tag: 'End' }),
+      ],
+      ''
+    ]))
   })
 })

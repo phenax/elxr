@@ -1,14 +1,24 @@
-import { flow, pipe } from 'fp-ts/function'
-import { Either, left, right, map, chain, orElse, fold } from 'fp-ts/Either'
+import { constant, flow, pipe } from 'fp-ts/function'
+import {
+  Either,
+  left,
+  right,
+  map,
+  chain,
+  orElse,
+  fold,
+  orElseW,
+} from 'fp-ts/Either'
 import { none, some, Option } from 'fp-ts/Option'
-import { mapFst, snd } from 'fp-ts/Tuple'
+import { mapFst, mapSnd, snd } from 'fp-ts/Tuple'
 import { eq } from './utils'
 
 export type char = string
 
-export type ParserResult<T> = [T, string]
+export type ParserState<T> = [T, string]
 export type ParserError = [string, string]
-export type Parser<T> = (input: string) => Either<ParserError, ParserResult<T>>
+export type ParserResult<T> = Either<ParserError, ParserState<T>>
+export type Parser<T> = (input: string) => ParserResult<T>
 
 export const constP =
   <T>(v: T): Parser<T> =>
@@ -39,13 +49,29 @@ export const many1 = <T>(parser: Parser<T>): Parser<Array<T>> =>
     )
   )
 
+const recoverInput =
+  <T>(p: Parser<T>): Parser<T> =>
+  (input: string) =>
+    pipe(
+      input,
+      p,
+      orElseW(
+        flow(
+          mapSnd((_) => input),
+          left
+        )
+      )
+    )
+
 export const prefixed = <T>(a: Parser<any>, b: Parser<T>): Parser<T> =>
-  flow(a, chain(flow(snd, b)))
+  recoverInput(flow(a, chain(flow(snd, b))))
 
 export const suffixed = <T>(a: Parser<T>, b: Parser<any>): Parser<T> =>
-  flow(
-    a,
-    chain(([out, inp]) => pipe(inp, b, map(mapFst((_) => out))))
+  recoverInput(
+    flow(
+      a,
+      chain(([out, inp]) => pipe(inp, b, map(mapFst((_) => out))))
+    )
   )
 
 export const delimited = <T>(
