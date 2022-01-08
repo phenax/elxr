@@ -3,10 +3,13 @@ export const eq =
   (b: T): boolean =>
     a === b
 
+type TagValue<T, N> = T extends Tag<N, infer V> ? V : never;
+
 export const match =
-  <R, K extends string>(pattern: { [key in K | '_']: () => R }) =>
-  (k: K): R =>
-    (pattern[k] || pattern._)()
+  <R, T extends Tag<string, any>>
+  (pattern: { [key in T['tag'] | '_']?: (v: TagValue<T, key>) => R }) =>
+    (tag: T): R =>
+      (pattern[tag.tag] || pattern._ as any)(tag.value)
 
 type Tag<N, V> = { tag: N; value: V }
 export type Union<T> = { [N in keyof T]: Tag<N, T[N]> }[keyof T]
