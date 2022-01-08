@@ -1,4 +1,5 @@
 import { pipe } from 'fp-ts/function'
+import {takeLeftWhile} from 'fp-ts/lib/Array'
 import { Expr, ListExpr } from '../types'
 import { match } from '../utils'
 
@@ -18,6 +19,16 @@ export const find = <T>([startO, exprs, endO]: ListExpr, list: T[]): any => {
           Group: ({ exprs }) => exprs.every(e => check(e)(x, i, ls)),
           PropertyMatch: ({ name, exprs }) =>
             name in x && exprs.every(e => check(e)(x[name], i, ls)),
+          OneOrMore: ({ expr }) => {
+            // TODO: Nested quantified expression
+            const x = pipe(
+              list.slice(i),
+              takeLeftWhile(x => check(expr)(x, i, list)),
+            )
+            console.log(x)
+            
+            return true
+          },
           _: _ => false,
         }),
       )

@@ -60,4 +60,17 @@ describe('Eval', () => {
 
     expect(find(liexp, list)).toEqual([{ name: 'gello', age: 20 }])
   })
+
+  xit('with groups', () => {
+    const list = [0, 1, 1, 1, '2', 3, 4, [4], 5, '']
+
+    const liexp: ListExpr = [
+      none,
+      [
+        Expr.OneOrMore({ expr: Expr.AnyNumber(null) }),
+      ],
+      none,
+    ]
+    expect(find(liexp, list)).toEqual([1, 3, 5])
+  })
 })

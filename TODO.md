@@ -10,3 +10,6 @@
   - [ ] Func: match
   - [ ] Func: replace
 
+## Issues
+  - [ ] . should not match for empty list
+
