@@ -1,19 +1,19 @@
 import { constructors, Union } from "./utils"
 
 type ExprT = {
-  Start: any,
-  End: any,
+  Start: null,
+  End: null,
   Optional: { expr: Expr },
   OneOrMore: { expr: Expr },
   ZeroOrMore: { expr: Expr },
-  NextItem: any,
-  AnyItem: any,
-  Or: any,
-  AnyString: any,
-  AnyNumber: any,
-  AnyBool: any,
-  Truthy: any,
-  Falsey: any,
+  NextItem: null,
+  AnyItem: null,
+  Or: { left: Expr, right: Expr[] },
+  AnyString: null,
+  AnyNumber: null,
+  AnyBool: null,
+  Truthy: null,
+  Falsey: null,
   Group: { exprs: Expr[] },
 }
 

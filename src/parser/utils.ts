@@ -78,7 +78,7 @@ export const delimited = <T>(
   p: Parser<any>,
   a: Parser<T>,
   s: Parser<any>,
-): Parser<T> => suffixed(prefixed(p, a), s)
+): Parser<T> => recoverInput(suffixed(prefixed(p, a), s))
 
 export const satifyChar =
   (f: (c: char) => boolean): Parser<char> =>
@@ -150,13 +150,16 @@ export const optional = <T>(p: Parser<T>): Parser<Option<T>> =>
   )
 
 export const pair = <A, B>(a: Parser<A>, b: Parser<B>): Parser<[A, B]> =>
-  pipe(
-    a,
-    andThen(ra => mapTo(b, rb => [ra, rb])),
+  recoverInput(
+    pipe(
+      a,
+      andThen(ra => mapTo(b, rb => [ra, rb])),
+    ),
   )
 
 export const tuple3 = <A, B, C>(
   a: Parser<A>,
   b: Parser<B>,
   c: Parser<C>,
-): Parser<[A, B, C]> => mapTo(pair(pair(a, b), c), ([[a, b], c]) => [a, b, c])
+): Parser<[A, B, C]> =>
+  recoverInput(mapTo(pair(pair(a, b), c), ([[a, b], c]) => [a, b, c]))

@@ -8,6 +8,7 @@ import {
   or,
   Parser,
   ParserResult,
+  prefixed,
   symbol,
   tuple3,
 } from './utils'
@@ -36,6 +37,17 @@ export const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
     ),
   )
 
+export const wrapAlt: (e: ParserResult<Expr>) => ParserResult<Expr> = chain(
+  ([expr, input]) =>
+    pipe(
+      input,
+      mapTo(prefixed(symbol('|'), many1(expressionP)), rest =>
+        Expr.Or({ left: expr, right: rest }),
+      ),
+      orElse(_ => right([expr, input])),
+    ),
+)
+
 export const expressionP: Parser<Expr> = (input: string) =>
   pipe(
     input,
@@ -52,6 +64,7 @@ export const expressionP: Parser<Expr> = (input: string) =>
       falsey,
     ]),
     wrapQuantifiers,
+    wrapAlt,
   )
 
 export const parser = tuple3(optional(start), many1(expressionP), optional(end))
@@ -62,7 +75,6 @@ export const parser = tuple3(optional(start), many1(expressionP), optional(end))
 (> 5) => number greater than
 (< 5) => number less than
 [name x] => apply x on property `name`
-| => or
 /x/ => match regular expression (string values in list)
 
 */
