@@ -22,3 +22,6 @@ export const constructors = <T extends Record<string, any>>(): {
       },
     },
   ) as any
+
+export const jlog = (x: any) => console.log(JSON.stringify(x, null, 2))
+

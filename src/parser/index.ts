@@ -12,7 +12,7 @@ import {
   symbol,
   tuple3,
 } from './utils'
-import { Expr } from '../types'
+import { Expr, ListExpr } from '../types'
 
 export const start = mapTo(symbol('^'), _ => Expr.Start(null))
 export const end = mapTo(symbol('$'), _ => Expr.End(null))
@@ -67,7 +67,7 @@ export const expressionP: Parser<Expr> = (input: string) =>
     wrapAlt,
   )
 
-export const parser = tuple3(optional(start), many1(expressionP), optional(end))
+export const parser: Parser<ListExpr> = tuple3(optional(start), many1(expressionP), optional(end))
 
 /*
 

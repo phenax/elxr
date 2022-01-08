@@ -1,3 +1,4 @@
+import {Option} from "fp-ts/lib/Option"
 import { constructors, Union } from "./utils"
 
 type ExprT = {
@@ -20,4 +21,10 @@ type ExprT = {
 export type Expr = Union<ExprT>
 
 export const Expr = constructors<ExprT>()
+
+export type ListExpr = [
+  Option<Expr>,
+  Expr[],
+  Option<Expr>,
+]
 
