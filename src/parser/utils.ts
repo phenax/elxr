@@ -29,14 +29,14 @@ export const many0 = <T>(parser: Parser<T>): Parser<Array<T>> =>
   flow(
     parser,
     chain(([a, nextInput]) =>
-      pipe(nextInput, many0(parser), map(mapFst((ls) => [a, ...ls])))
+      pipe(nextInput, many0(parser), map(mapFst(ls => [a, ...ls]))),
     ),
     orElse(
       flow(
-        mapFst((_) => [] as T[]),
-        right
-      )
-    )
+        mapFst(_ => [] as T[]),
+        right,
+      ),
+    ),
   )
 
 export const many1 = <T>(parser: Parser<T>): Parser<Array<T>> =>
@@ -45,8 +45,8 @@ export const many1 = <T>(parser: Parser<T>): Parser<Array<T>> =>
     chain(([res, inp]) =>
       res.length > 0
         ? right([res, inp])
-        : left([`many1 failed to parse at ${inp}`, inp])
-    )
+        : left([`many1 failed to parse at ${inp}`, inp]),
+    ),
   )
 
 const recoverInput =
@@ -57,10 +57,10 @@ const recoverInput =
       p,
       orElseW(
         flow(
-          mapSnd((_) => input),
-          left
-        )
-      )
+          mapSnd(_ => input),
+          left,
+        ),
+      ),
     )
 
 export const prefixed = <T>(a: Parser<any>, b: Parser<T>): Parser<T> =>
@@ -70,14 +70,14 @@ export const suffixed = <T>(a: Parser<T>, b: Parser<any>): Parser<T> =>
   recoverInput(
     flow(
       a,
-      chain(([out, inp]) => pipe(inp, b, map(mapFst((_) => out))))
-    )
+      chain(([out, inp]) => pipe(inp, b, map(mapFst(_ => out)))),
+    ),
   )
 
 export const delimited = <T>(
   p: Parser<any>,
   a: Parser<T>,
-  s: Parser<any>
+  s: Parser<any>,
 ): Parser<T> => suffixed(prefixed(p, a), s)
 
 export const satifyChar =
@@ -88,18 +88,18 @@ export const satifyChar =
     return left([`Expected to satisfy ${f}, got "${c}"`, input])
   }
 
-export const digit = satifyChar((c) => /^[0-9]$/g.test(c))
+export const digit = satifyChar(c => /^[0-9]$/g.test(c))
 
 export const integer: Parser<number> = flow(
   many1(digit),
-  map(mapFst((ds) => parseInt(ds.join(''), 10)))
+  map(mapFst(ds => parseInt(ds.join(''), 10))),
 )
 
 export const or = <T>(parsers: Parser<T>[]): Parser<T> => {
   const run = ([p, ...ps]: Parser<T>[]) =>
     flow(
       p,
-      orElse(([_, inp]) => or(ps)(inp))
+      orElse(([_, inp]) => or(ps)(inp)),
     )
 
   return parsers.length > 0
@@ -134,7 +134,7 @@ export const andThen =
   (p: Parser<I>): Parser<R> =>
     flow(
       p,
-      chain(([v, inp]) => f(v)(inp))
+      chain(([v, inp]) => f(v)(inp)),
     )
 
 export const optional = <T>(p: Parser<T>): Parser<Option<T>> =>
@@ -142,21 +142,21 @@ export const optional = <T>(p: Parser<T>): Parser<Option<T>> =>
     p,
     fold(
       flow(
-        mapFst((_) => none),
-        right
+        mapFst(_ => none),
+        right,
       ),
-      flow(mapFst(some), right)
-    )
+      flow(mapFst(some), right),
+    ),
   )
 
 export const pair = <A, B>(a: Parser<A>, b: Parser<B>): Parser<[A, B]> =>
   pipe(
     a,
-    andThen((ra) => mapTo(b, (rb) => [ra, rb]))
+    andThen(ra => mapTo(b, rb => [ra, rb])),
   )
 
 export const tuple3 = <A, B, C>(
   a: Parser<A>,
   b: Parser<B>,
-  c: Parser<C>
+  c: Parser<C>,
 ): Parser<[A, B, C]> => mapTo(pair(pair(a, b), c), ([[a, b], c]) => [a, b, c])

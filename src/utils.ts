@@ -20,5 +20,5 @@ export const constructors = <T extends Record<string, any>>(): {
       get(_, k) {
         return (value: any) => ({ tag: k, value })
       },
-    }
+    },
   ) as any

@@ -7,6 +7,7 @@
     "noImplicitAny": false,
     "esModuleInterop": true,
     "moduleResolution": "node",
+    "noImplicitReturns": true,
     "checkJs": false,
     "outDir": "lib",
     "baseUrl": "."

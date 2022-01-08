@@ -13,35 +13,35 @@ import {
 } from './utils'
 import { Expr } from '../types'
 
-export const start = mapTo(symbol('^'), () => Expr.Start(null))
-export const end = mapTo(symbol('$'), () => Expr.End(null))
-export const anyItem = mapTo(symbol('.'), () => Expr.AnyItem(null))
-export const nextItem = mapTo(symbol(','), () => Expr.NextItem(null))
-export const anyString = mapTo(symbol('\\s'), () => Expr.AnyString(null))
-export const anyNumber = mapTo(symbol('\\n'), () => Expr.AnyNumber(null))
-export const anyBool = mapTo(symbol('\\b'), () => Expr.AnyBool(null))
-export const truthy = mapTo(symbol('\\T'), () => Expr.Truthy(null))
-export const falsey = mapTo(symbol('\\F'), () => Expr.Falsey(null))
+export const start = mapTo(symbol('^'), _ => Expr.Start(null))
+export const end = mapTo(symbol('$'), _ => Expr.End(null))
+export const anyItem = mapTo(symbol('.'), _ => Expr.AnyItem(null))
+export const nextItem = mapTo(symbol(','), _ => Expr.NextItem(null))
+export const anyString = mapTo(symbol('\\s'), _ => Expr.AnyString(null))
+export const anyNumber = mapTo(symbol('\\n'), _ => Expr.AnyNumber(null))
+export const anyBool = mapTo(symbol('\\b'), _ => Expr.AnyBool(null))
+export const truthy = mapTo(symbol('\\T'), _ => Expr.Truthy(null))
+export const falsey = mapTo(symbol('\\F'), _ => Expr.Falsey(null))
 
 export const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
   chain(([expr, input]) =>
     pipe(
       input,
       or([
-        mapTo(symbol('*'), () => Expr.ZeroOrMore({ expr })),
-        mapTo(symbol('+'), () => Expr.OneOrMore({ expr })),
-        mapTo(symbol('?'), () => Expr.Optional({ expr })),
+        mapTo(symbol('*'), _ => Expr.ZeroOrMore({ expr })),
+        mapTo(symbol('+'), _ => Expr.OneOrMore({ expr })),
+        mapTo(symbol('?'), _ => Expr.Optional({ expr })),
       ]),
-      orElse(() => right([expr, input]))
-    )
+      orElse(_ => right([expr, input])),
+    ),
   )
 
 export const expressionP: Parser<Expr> = (input: string) =>
   pipe(
     input,
     or([
-      mapTo(delimited(symbol('('), many1(expressionP), symbol(')')), (exprs) =>
-        Expr.Group({ exprs })
+      mapTo(delimited(symbol('('), many1(expressionP), symbol(')')), exprs =>
+        Expr.Group({ exprs }),
       ),
       nextItem,
       anyItem,
@@ -51,7 +51,7 @@ export const expressionP: Parser<Expr> = (input: string) =>
       truthy,
       falsey,
     ]),
-    wrapQuantifiers
+    wrapQuantifiers,
   )
 
 export const parser = tuple3(optional(start), many1(expressionP), optional(end))
