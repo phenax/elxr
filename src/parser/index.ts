@@ -30,8 +30,8 @@ const anyBool = mapTo(symbol('\\b'), _ => Expr.AnyBool(null))
 const truthy = mapTo(symbol('\\T'), _ => Expr.Truthy(null))
 const falsey = mapTo(symbol('\\F'), _ => Expr.Falsey(null))
 
-const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
-  chain(([expr, input]) =>
+const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> = chain(
+  ([expr, input]) =>
     pipe(
       input,
       or([
@@ -41,7 +41,7 @@ const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
       ]),
       orElse(_ => right([expr, input])),
     ),
-  )
+)
 
 const wrapAlt: (e: ParserResult<Expr>) => ParserResult<Expr> = chain(
   ([expr, input]) =>
@@ -63,12 +63,18 @@ export const propertyName: Parser<string> = pipe(
   p => suffixed(p, whitespaces0),
 )
 
-const objectProperty = (input: string) => pipe(
-  input,
-  mapTo(delimited(symbol('['), pair(propertyName, many0(expressionP)), symbol(']')), ([name, exprs]) =>
-    Expr.PropertyMatch({ name, exprs }),
-  ),
-)
+const objectProperty = (input: string) =>
+  pipe(
+    input,
+    mapTo(
+      delimited(
+        symbol('['),
+        pair(propertyName, many0(expressionP)),
+        symbol(']'),
+      ),
+      ([name, exprs]) => Expr.PropertyMatch({ name, exprs }),
+    ),
+  )
 
 const expressionP: Parser<Expr> = (input: string) =>
   pipe(
@@ -90,7 +96,11 @@ const expressionP: Parser<Expr> = (input: string) =>
     wrapAlt,
   )
 
-export const parser: Parser<ListExpr> = tuple3(optional(start), many1(expressionP), optional(end))
+export const parser: Parser<ListExpr> = tuple3(
+  optional(start),
+  many1(expressionP),
+  optional(end),
+)
 
 /*
 

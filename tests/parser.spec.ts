@@ -91,7 +91,10 @@ describe('Foobar', () => {
         [
           none,
           [
-            Expr.PropertyMatch({ name: 'name', exprs: [Expr.AnyString(null), Expr.Truthy(null)] }),
+            Expr.PropertyMatch({
+              name: 'name',
+              exprs: [Expr.AnyString(null), Expr.Truthy(null)],
+            }),
             Expr.PropertyMatch({ name: 'age', exprs: [Expr.AnyNumber(null)] }),
           ],
           none,

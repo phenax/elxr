@@ -40,14 +40,16 @@ export const many0 = <T>(parser: Parser<T>): Parser<Array<T>> =>
   )
 
 export const many1 = <T>(parser: Parser<T>): Parser<Array<T>> =>
-  recoverInput(flow(
-    many0(parser),
-    chain(([res, inp]) =>
-      res.length > 0
-        ? right([res, inp])
-        : left([`many1 failed to parse at ${inp}`, inp]),
+  recoverInput(
+    flow(
+      many0(parser),
+      chain(([res, inp]) =>
+        res.length > 0
+          ? right([res, inp])
+          : left([`many1 failed to parse at ${inp}`, inp]),
+      ),
     ),
-  ))
+  )
 
 const recoverInput =
   <T>(p: Parser<T>): Parser<T> =>
