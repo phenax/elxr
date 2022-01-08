@@ -1,30 +1,36 @@
-import { pipe } from 'fp-ts/function'
-import { chain, orElse, right } from 'fp-ts/lib/Either'
+import { flow, pipe } from 'fp-ts/function'
+import { chain, left, orElse, right } from 'fp-ts/lib/Either'
 import {
   delimited,
+  many0,
   many1,
   mapTo,
+  oneOf,
   optional,
   or,
+  pair,
   Parser,
   ParserResult,
   prefixed,
+  satifyChar,
+  suffixed,
   symbol,
   tuple3,
+  whitespaces0,
 } from './utils'
 import { Expr, ListExpr } from '../types'
 
-export const start = mapTo(symbol('^'), _ => Expr.Start(null))
-export const end = mapTo(symbol('$'), _ => Expr.End(null))
-export const anyItem = mapTo(symbol('.'), _ => Expr.AnyItem(null))
-export const nextItem = mapTo(symbol(','), _ => Expr.NextItem(null))
-export const anyString = mapTo(symbol('\\s'), _ => Expr.AnyString(null))
-export const anyNumber = mapTo(symbol('\\n'), _ => Expr.AnyNumber(null))
-export const anyBool = mapTo(symbol('\\b'), _ => Expr.AnyBool(null))
-export const truthy = mapTo(symbol('\\T'), _ => Expr.Truthy(null))
-export const falsey = mapTo(symbol('\\F'), _ => Expr.Falsey(null))
+const start = mapTo(symbol('^'), _ => Expr.Start(null))
+const end = mapTo(symbol('$'), _ => Expr.End(null))
+const anyItem = mapTo(symbol('.'), _ => Expr.AnyItem(null))
+const nextItem = mapTo(symbol(','), _ => Expr.NextItem(null))
+const anyString = mapTo(symbol('\\s'), _ => Expr.AnyString(null))
+const anyNumber = mapTo(symbol('\\n'), _ => Expr.AnyNumber(null))
+const anyBool = mapTo(symbol('\\b'), _ => Expr.AnyBool(null))
+const truthy = mapTo(symbol('\\T'), _ => Expr.Truthy(null))
+const falsey = mapTo(symbol('\\F'), _ => Expr.Falsey(null))
 
-export const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
+const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
   chain(([expr, input]) =>
     pipe(
       input,
@@ -37,7 +43,7 @@ export const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
     ),
   )
 
-export const wrapAlt: (e: ParserResult<Expr>) => ParserResult<Expr> = chain(
+const wrapAlt: (e: ParserResult<Expr>) => ParserResult<Expr> = chain(
   ([expr, input]) =>
     pipe(
       input,
@@ -48,13 +54,30 @@ export const wrapAlt: (e: ParserResult<Expr>) => ParserResult<Expr> = chain(
     ),
 )
 
-export const expressionP: Parser<Expr> = (input: string) =>
+const propRegex = /^[A-Za-z0-9_-]$/
+
+export const propertyName: Parser<string> = pipe(
+  satifyChar(c => propRegex.test(c)),
+  many1,
+  p => mapTo(p, xs => xs.join('')),
+  p => suffixed(p, whitespaces0),
+)
+
+const objectProperty = (input: string) => pipe(
+  input,
+  mapTo(delimited(symbol('['), pair(propertyName, many0(expressionP)), symbol(']')), ([name, exprs]) =>
+    Expr.PropertyMatch({ name, exprs }),
+  ),
+)
+
+const expressionP: Parser<Expr> = (input: string) =>
   pipe(
     input,
     or([
       mapTo(delimited(symbol('('), many1(expressionP), symbol(')')), exprs =>
         Expr.Group({ exprs }),
       ),
+      objectProperty,
       nextItem,
       anyItem,
       anyString,

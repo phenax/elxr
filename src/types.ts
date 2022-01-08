@@ -16,6 +16,7 @@ type ExprT = {
   Truthy: null,
   Falsey: null,
   Group: { exprs: Expr[] },
+  PropertyMatch: { name: string, exprs: Expr[] },
 }
 
 export type Expr = Union<ExprT>

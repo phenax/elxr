@@ -40,14 +40,14 @@ export const many0 = <T>(parser: Parser<T>): Parser<Array<T>> =>
   )
 
 export const many1 = <T>(parser: Parser<T>): Parser<Array<T>> =>
-  flow(
+  recoverInput(flow(
     many0(parser),
     chain(([res, inp]) =>
       res.length > 0
         ? right([res, inp])
         : left([`many1 failed to parse at ${inp}`, inp]),
     ),
-  )
+  ))
 
 const recoverInput =
   <T>(p: Parser<T>): Parser<T> =>
@@ -122,6 +122,8 @@ export const matchString =
     input.slice(0, s.length) === s
       ? right([s, input.slice(s.length)])
       : left([`Expected ${s} but got ${input.slice(0, 1)}`, input])
+
+export const oneOf = (xs: string[]): Parser<string> => or(xs.map(matchString))
 
 export const symbol = (s: string): Parser<string> =>
   delimited(whitespaces0, matchString(s), whitespaces0)

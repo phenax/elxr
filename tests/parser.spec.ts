@@ -4,8 +4,10 @@ import {
   whitespace,
   whitespaces0,
   delimited,
+  many1,
+  satifyChar,
 } from '../src/parser/utils'
-import { parser } from '../src/parser'
+import { parser, propertyName } from '../src/parser'
 import { none, some } from 'fp-ts/Option'
 import { Expr } from '../src/types'
 
@@ -75,6 +77,22 @@ describe('Foobar', () => {
                 }),
               ],
             }),
+          ],
+          none,
+        ],
+        '',
+      ]),
+    )
+  })
+
+  it('object proprtyu', () => {
+    expect(parser(/ [name \s\T] [age \n] /.source)).toEqual(
+      right([
+        [
+          none,
+          [
+            Expr.PropertyMatch({ name: 'name', exprs: [Expr.AnyString(null), Expr.Truthy(null)] }),
+            Expr.PropertyMatch({ name: 'age', exprs: [Expr.AnyNumber(null)] }),
           ],
           none,
         ],
