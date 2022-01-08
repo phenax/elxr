@@ -1,4 +1,4 @@
-import { constant, pipe } from 'fp-ts/function'
+import { pipe } from 'fp-ts/function'
 import { chain, orElse, right } from 'fp-ts/lib/Either'
 import {
   delimited,
@@ -13,36 +13,24 @@ import {
 } from './utils'
 import { Expr } from '../types'
 
-export const start = mapTo(symbol('^'), constant({ tag: 'Start' } as Expr))
-export const end = mapTo(symbol('$'), constant({ tag: 'End' } as Expr))
-export const anyItem = mapTo(symbol('.'), constant({ tag: 'AnyItem' } as Expr))
-export const nextItem = mapTo(
-  symbol(','),
-  constant({ tag: 'NextItem' } as Expr)
-)
-export const anyString = mapTo(
-  symbol('\\s'),
-  constant({ tag: 'AnyString' } as Expr)
-)
-export const anyNumber = mapTo(
-  symbol('\\n'),
-  constant({ tag: 'AnyNumber' } as Expr)
-)
-export const anyBool = mapTo(
-  symbol('\\b'),
-  constant({ tag: 'AnyBool' } as Expr)
-)
-export const truthy = mapTo(symbol('\\T'), constant({ tag: 'Truthy' } as Expr))
-export const falsey = mapTo(symbol('\\F'), constant({ tag: 'Falsey' } as Expr))
+export const start = mapTo(symbol('^'), () => Expr.Start(null))
+export const end = mapTo(symbol('$'), () => Expr.End(null))
+export const anyItem = mapTo(symbol('.'), () => Expr.AnyItem(null))
+export const nextItem = mapTo(symbol(','), () => Expr.NextItem(null))
+export const anyString = mapTo(symbol('\\s'), () => Expr.AnyString(null))
+export const anyNumber = mapTo(symbol('\\n'), () => Expr.AnyNumber(null))
+export const anyBool = mapTo(symbol('\\b'), () => Expr.AnyBool(null))
+export const truthy = mapTo(symbol('\\T'), () => Expr.Truthy(null))
+export const falsey = mapTo(symbol('\\F'), () => Expr.Falsey(null))
 
 export const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
   chain(([expr, input]) =>
     pipe(
       input,
       or([
-        mapTo(symbol('*'), (_) => ({ tag: 'ZeroOrMore', expr } as Expr)),
-        mapTo(symbol('+'), (_) => ({ tag: 'OneOrMore', expr } as Expr)),
-        mapTo(symbol('?'), (_) => ({ tag: 'Optional', expr } as Expr)),
+        mapTo(symbol('*'), () => Expr.ZeroOrMore({ expr })),
+        mapTo(symbol('+'), () => Expr.OneOrMore({ expr })),
+        mapTo(symbol('?'), () => Expr.Optional({ expr })),
       ]),
       orElse(() => right([expr, input]))
     )
@@ -52,9 +40,8 @@ export const expressionP: Parser<Expr> = (input: string) =>
   pipe(
     input,
     or([
-      mapTo(
-        delimited(symbol('('), many1(expressionP), symbol(')')),
-        (exprs) => ({ tag: 'Group', exprs } as Expr)
+      mapTo(delimited(symbol('('), many1(expressionP), symbol(')')), (exprs) =>
+        Expr.Group({ exprs })
       ),
       nextItem,
       anyItem,

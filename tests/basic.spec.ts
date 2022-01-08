@@ -7,6 +7,7 @@ import {
 } from '../src/parser/utils'
 import { parser } from '../src/parser'
 import { some } from 'fp-ts/Option'
+import { Expr } from '../src/types'
 
 describe('Foobar', () => {
   it('should do shit', () => {
@@ -28,15 +29,15 @@ describe('Foobar', () => {
     expect(parser(/^ .\s(\n)\b  \T $/.source)).toEqual(
       right([
         [
-          some({ tag: 'Start' }),
+          some(Expr.Start(null)),
           [
-            { tag: 'AnyItem' },
-            { tag: 'AnyString' },
-            { tag: 'Group', exprs: [{ tag: 'AnyNumber' }] },
-            { tag: 'AnyBool' },
-            { tag: 'Truthy' },
+            Expr.AnyItem(null),
+            Expr.AnyString(null),
+            Expr.Group({ exprs: [Expr.AnyNumber(null)] }),
+            Expr.AnyBool(null),
+            Expr.Truthy(null),
           ],
-          some({ tag: 'End' }),
+          some(Expr.End(null)),
         ],
         '',
       ])
@@ -45,13 +46,13 @@ describe('Foobar', () => {
     expect(parser(/^ \s* \T? \n+ $/.source)).toEqual(
       right([
         [
-          some({ tag: 'Start' }),
+          some(Expr.Start(null)),
           [
-            { tag: 'ZeroOrMore', expr: { tag: 'AnyString' } },
-            { tag: 'Optional', expr: { tag: 'Truthy' } },
-            { tag: 'OneOrMore', expr: { tag: 'AnyNumber' } },
+            Expr.ZeroOrMore({ expr: Expr.AnyString(null) }),
+            Expr.Optional({ expr: Expr.Truthy(null) }),
+            Expr.OneOrMore({ expr: Expr.AnyNumber(null) }),
           ],
-          some({ tag: 'End' }),
+          some(Expr.End(null)),
         ],
         '',
       ])

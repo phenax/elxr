@@ -1,17 +1,23 @@
+import { constructors, Union } from "./utils"
 
-export type Expr =
-  | { tag: 'Start' }
-  | { tag: 'End' }
-  | { tag: 'Optional'; expr: Expr }
-  | { tag: 'OneOrMore'; expr: Expr }
-  | { tag: 'ZeroOrMore'; expr: Expr }
-  | { tag: 'NextItem' }
-  | { tag: 'AnyItem' }
-  | { tag: 'Or' }
-  | { tag: 'AnyString' }
-  | { tag: 'AnyNumber' }
-  | { tag: 'AnyBool' }
-  | { tag: 'Truthy' }
-  | { tag: 'Falsey' }
-  | { tag: 'Group'; exprs: Expr[] }
+type ExprT = {
+  Start: any,
+  End: any,
+  Optional: { expr: Expr },
+  OneOrMore: { expr: Expr },
+  ZeroOrMore: { expr: Expr },
+  NextItem: any,
+  AnyItem: any,
+  Or: any,
+  AnyString: any,
+  AnyNumber: any,
+  AnyBool: any,
+  Truthy: any,
+  Falsey: any,
+  Group: { exprs: Expr[] },
+}
+
+export type Expr = Union<ExprT>
+
+export const Expr = constructors<ExprT>()
 
