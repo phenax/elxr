@@ -1,5 +1,5 @@
 import { pipe } from 'fp-ts/function'
-import {takeLeftWhile} from 'fp-ts/lib/Array'
+import { takeLeftWhile } from 'fp-ts/lib/Array'
 import { Expr, ListExpr } from '../types'
 import { match } from '../utils'
 
@@ -26,7 +26,7 @@ export const find = <T>([startO, exprs, endO]: ListExpr, list: T[]): any => {
               takeLeftWhile(x => check(expr)(x, i, list)),
             )
             console.log(x)
-            
+
             return true
           },
           _: _ => false,
