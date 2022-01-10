@@ -16,8 +16,23 @@ describe('Basic tests', () => {
     // jlog(matchAll(/[age \n]+/, [ {}, { age: 1 }, '' ]))
     // jlog(matchAll(/([age \T][age \n])+/, [ {}, { age: 1 }, { age: 2 }, { age: 0 }, '' ]))
 
-    // jlog(matchAll(/\n/, [ 'b', 1, 2, 'a', 3 ]))
-    jlog(matchAll(/\n\T/, [1, 0, 2, '4', '']))
+    expect(matchAll(/\n/, ['b', 1, 2, 'a', 3]).groups).toEqual([
+      { value: 1, index: 1 },
+      { value: 2, index: 2 },
+      { value: 3, index: 4 },
+    ])
+    expect(matchAll(/\n\T/, [1, 0, 2, '4', '']).groups).toEqual([
+      { value: 1, index: 0 },
+      { value: 2, index: 2 },
+    ])
+    expect(
+      matchAll(/[age \n][age \T]/, [{}, { age: 1 }, { age: 2 }, { age: 0 }, ''])
+        .groups,
+    ).toEqual([
+      { value: { age: 1 }, index: 1 },
+      { value: { age: 2 }, index: 2 },
+    ])
+
     // jlog(matchAll(/\n+/, [ '', 1, 2, 0, '', 5, '' ]))
   })
 })

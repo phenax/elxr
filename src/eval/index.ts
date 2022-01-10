@@ -39,7 +39,7 @@ export const matchAll = <T>(
     const next =
       (i: number = 1) =>
       (curMatch: MatchGroupIndexed[]) =>
-        [...curMatch, ...check(index + i, ls.slice(i), expr)]
+        [...curMatch, ...check(index + (i || 1), ls.slice(i), expr)]
 
     return pipe(
       expr,
@@ -59,11 +59,11 @@ export const matchAll = <T>(
             (acc, exp) =>
               pipe(
                 acc,
-                chain(m =>
+                chain(_m =>
                   pipe(
                     check(index, [item], exp),
                     res => res.length === 0 ? none : some(res),
-                    map(ac => [...ac, ...m]),
+                    map(ac => ac), // TODO: Doesn't seem right?
                   ),
                 ),
               ),
@@ -78,6 +78,7 @@ export const matchAll = <T>(
             Object.prototype.hasOwnProperty.call(item, name)
               ? check(index, [item[name]], Expr.Group({ exprs }))
               : [],
+            res => res.length > 0 ? [group(item, index)] : [], // FIXME: doesn't allow nested matching
             next(),
           ),
 
@@ -91,7 +92,7 @@ export const matchAll = <T>(
           //console.log(matches)
           return pipe(
             matches.length > 0 ? [group(matches, index)] : [],
-            next(matches.length || 1),
+            next(matches.length),
           )
         },
 
