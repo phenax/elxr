@@ -31,49 +31,28 @@ export const matchAll = <T>(
   [startO, exprs, endO]: ListExpr,
   list: T[],
 ): MatchGroupResult => {
-  const check = (
-    index: number,
-    ls: T[],
-    expr: Expr,
-  ): Option<MatchGroupIndexed[]> => {
-    if (ls.length === 0) return some([])
+  const check = (index: number, ls: T[], expr: Expr): MatchGroupIndexed[] => {
+    if (ls.length === 0) return []
 
     const [item, ...rest] = ls
 
     const next =
       (i: number = 1) =>
-      (cur: Option<MatchGroupIndexed[]>) =>
-        pipe(
-          check(index + i, ls.slice(i), expr),
-          getOrElseW(() => [] as MatchGroupIndexed[]),
-          nextMatch =>
-            pipe(
-              cur,
-              map(curMatch => [...curMatch, ...nextMatch]),
-            ),
-        )
+      (curMatch: MatchGroupIndexed[]) =>
+        [...curMatch, ...check(index + i, ls.slice(i), expr)]
 
     return pipe(
       expr,
-      match<Option<MatchGroupIndexed<any>[]>, Expr>({
-        AnyItem: _ => pipe(some([group(item, index)]), next()),
+      match<MatchGroupIndexed<any>[], Expr>({
+        AnyItem: _ => pipe([group(item, index)], next()),
         AnyNumber: _ =>
-          pipe(
-            typeof item === 'number' ? some([group(item, index)]) : none,
-            next(),
-          ),
+          pipe(typeof item === 'number' ? [group(item, index)] : [], next()),
         AnyString: _ =>
-          pipe(
-            typeof item === 'string' ? some([group(item, index)]) : none,
-            next(),
-          ),
+          pipe(typeof item === 'string' ? [group(item, index)] : [], next()),
         AnyBool: _ =>
-          pipe(
-            typeof item === 'boolean' ? some([group(item, index)]) : none,
-            next(),
-          ),
-        Truthy: _ => pipe(!!item ? some([group(item, index)]) : none, next()),
-        Falsey: _ => pipe(!item ? some([group(item, index)]) : none, next()),
+          pipe(typeof item === 'boolean' ? [group(item, index)] : [], next()),
+        Truthy: _ => pipe(!!item ? [group(item, index)] : [], next()),
+        Falsey: _ => pipe(!item ? [group(item, index)] : [], next()),
 
         Group: ({ exprs }) => {
           const matches = exprs.reduce(
@@ -82,23 +61,23 @@ export const matchAll = <T>(
                 acc,
                 chain(m =>
                   pipe(
-                    check(index, ls, exp),
+                    check(index, [item], exp),
+                    res => res.length === 0 ? none : some(res),
                     map(ac => [...ac, ...m]),
                   ),
                 ),
               ),
             some([] as MatchGroupIndexed<any>[]),
           )
-          // console.log(matches, exprs, '---', item)
-
-          return next()(matches)
+          // console.log(matches, exprs, '---', index)
+          return pipe(matches, getOrElseW(() => []), next())
         },
 
         PropertyMatch: ({ name, exprs }) =>
           pipe(
             Object.prototype.hasOwnProperty.call(item, name)
               ? check(index, [item[name]], Expr.Group({ exprs }))
-              : none,
+              : [],
             next(),
           ),
 
@@ -107,16 +86,16 @@ export const matchAll = <T>(
           // TODO: Nested quantified expression
           const matches = pipe(
             ls,
-            takeLeftWhile(a => isSome(check(index, [a], expr))),
+            takeLeftWhile(a => check(index, [a], expr).length > 0),
           )
           //console.log(matches)
           return pipe(
-            matches.length > 0 ? some([group(matches, index)]) : none,
+            matches.length > 0 ? [group(matches, index)] : [],
             next(matches.length || 1),
           )
         },
 
-        _: _ => none,
+        _: _ => [],
       }),
     )
   }
@@ -124,10 +103,7 @@ export const matchAll = <T>(
   const expr = Expr.Group({ exprs })
 
   return {
-    groups: pipe(
-      check(0, list, expr),
-      getOrElseW(() => []),
-    ),
+    groups: check(0, list, expr),
   }
 }
 
