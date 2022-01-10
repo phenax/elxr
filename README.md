@@ -1,6 +1,6 @@
 # ListExp [ WIP ]
 
-Regular expression-like syntax for list operations
+Regular expression-like syntax for list operations. You didn't ask for this so here it is.
 
 Example -
 

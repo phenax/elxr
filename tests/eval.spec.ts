@@ -2,9 +2,27 @@ import { left, right } from 'fp-ts/Either'
 import { none, some } from 'fp-ts/Option'
 import { Expr, ListExpr } from '../src/types'
 import { jlog } from '../src/utils'
-import { find } from '../src/eval'
+import { find, matchAll } from '../src/eval'
 
 describe('Eval', () => {
+  it('should do stuff', () => {
+    const ls = [-1, 1, 2, '3', 4, '5', 6, 7, '']
+
+    const liexp: ListExpr = [
+      none,
+      [
+        Expr.OneOrMore({
+          expr: Expr.Group({
+            exprs: [Expr.AnyNumber(null), Expr.Truthy(null)],
+          }),
+        }),
+      ],
+      none,
+    ]
+
+    //jlog(matchAll(liexp, ls))
+  })
+
   it('basic evaluation', () => {
     const list = [0, 1, '2', 3, [4], 5]
 
@@ -66,9 +84,7 @@ describe('Eval', () => {
 
     const liexp: ListExpr = [
       none,
-      [
-        Expr.OneOrMore({ expr: Expr.AnyNumber(null) }),
-      ],
+      [Expr.OneOrMore({ expr: Expr.AnyNumber(null) })],
       none,
     ]
     expect(find(liexp, list)).toEqual([1, 3, 5])
