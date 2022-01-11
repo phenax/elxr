@@ -1,5 +1,5 @@
 import { pipe } from 'fp-ts/function'
-import { takeLeftWhile } from 'fp-ts/lib/Array'
+import { takeLeftWhile, zip } from 'fp-ts/lib/Array'
 import {
   chain,
   getOrElseW,
@@ -26,6 +26,67 @@ const group = <T>(value: T, index: number): MatchGroupIndexed<T> => ({
   index,
 })
 
+const checkExpr = <T>(
+  expr: Expr,
+  item: T,
+  list: T[],
+  index: number,
+): MatchGroupIndexed<T>[] => {
+  return pipe(
+    expr,
+    match<MatchGroupIndexed<any>[], Expr>({
+      AnyItem: _ => [group(item, index)],
+      AnyNumber: _ => (typeof item === 'number' ? [group(item, index)] : []),
+      AnyString: _ => (typeof item === 'string' ? [group(item, index)] : []),
+      AnyBool: _ => (typeof item === 'boolean' ? [group(item, index)] : []),
+      Truthy: _ => (!!item ? [group(item, index)] : []),
+      Falsey: _ => (!item ? [group(item, index)] : []),
+
+      Group: ({ exprs }) => {
+        const [head, ...tail] = exprs
+        const matches = tail.reduce(
+          (acc, exp) =>
+            pipe(
+              acc,
+              chain(ac =>
+                pipe(
+                  checkExpr(exp, item, list, index),
+                  zip(ac),
+                  z => z.map(([res, _cur]) => res),
+                  z => (z.length === 0 ? none : some(z)),
+                ),
+              ),
+            ),
+          some(checkExpr(head, item, list, index)),
+        )
+        return pipe(
+          matches,
+          getOrElseW(() => []),
+        )
+      },
+
+      PropertyMatch: ({ name, exprs }) =>
+        pipe(
+          Object.prototype.hasOwnProperty.call(item, name)
+            ? checkExpr(Expr.Group({ exprs }), item[name], list, index)
+            : [],
+          res => (res.length > 0 ? [group(item, index)] : []), // FIXME: doesn't allow nested matching
+        ),
+
+      OneOrMore: ({ expr }) => {
+        // TODO: Nested quantified expression
+        const matches = pipe(
+          list,
+          takeLeftWhile(a => checkExpr(expr, a, list, index).length > 0),
+        )
+        return matches.length > 0 ? [group(matches, index)] : []
+      },
+
+      _: _ => [],
+    }),
+  )
+}
+
 // :: ListExpr -> [a] -> [{ groups: [T] }]
 export const matchAll = <T>(
   [startO, exprs, endO]: ListExpr,
@@ -39,64 +100,19 @@ export const matchAll = <T>(
     const next =
       (i: number = 1) =>
       (curMatch: MatchGroupIndexed[]) =>
-        [...curMatch, ...check(index + (i || 1), ls.slice(i), expr)]
+        [...curMatch, ...check(index + i, ls.slice(i), expr)]
 
     return pipe(
       expr,
       match<MatchGroupIndexed<any>[], Expr>({
-        AnyItem: _ => pipe([group(item, index)], next()),
-        AnyNumber: _ =>
-          pipe(typeof item === 'number' ? [group(item, index)] : [], next()),
-        AnyString: _ =>
-          pipe(typeof item === 'string' ? [group(item, index)] : [], next()),
-        AnyBool: _ =>
-          pipe(typeof item === 'boolean' ? [group(item, index)] : [], next()),
-        Truthy: _ => pipe(!!item ? [group(item, index)] : [], next()),
-        Falsey: _ => pipe(!item ? [group(item, index)] : [], next()),
-
-        Group: ({ exprs }) => {
-          const matches = exprs.reduce(
-            (acc, exp) =>
-              pipe(
-                acc,
-                chain(_m =>
-                  pipe(
-                    check(index, [item], exp),
-                    res => res.length === 0 ? none : some(res),
-                    map(ac => ac), // TODO: Doesn't seem right?
-                  ),
-                ),
-              ),
-            some([] as MatchGroupIndexed<any>[]),
-          )
-          // console.log(matches, exprs, '---', index)
-          return pipe(matches, getOrElseW(() => []), next())
-        },
-
-        PropertyMatch: ({ name, exprs }) =>
-          pipe(
-            Object.prototype.hasOwnProperty.call(item, name)
-              ? check(index, [item[name]], Expr.Group({ exprs }))
-              : [],
-            res => res.length > 0 ? [group(item, index)] : [], // FIXME: doesn't allow nested matching
-            next(),
-          ),
-
         OneOrMore: ({ expr }) => {
-          //console.log(item)
-          // TODO: Nested quantified expression
-          const matches = pipe(
-            ls,
-            takeLeftWhile(a => check(index, [a], expr).length > 0),
-          )
-          //console.log(matches)
           return pipe(
-            matches.length > 0 ? [group(matches, index)] : [],
-            next(matches.length),
+            checkExpr(expr, item, ls, index),
+            matches => next(1)(matches), // matches.length || 
           )
         },
 
-        _: _ => [],
+        _: _ => pipe(checkExpr(expr, item, ls, index), next()),
       }),
     )
   }
@@ -130,8 +146,6 @@ export const find = <T>([startO, exprs, endO]: ListExpr, list: T[]): any => {
               list.slice(i),
               takeLeftWhile(x => check(expr)(x, i, list)),
             )
-            //console.log(x)
-
             return true
           },
           _: _ => false,

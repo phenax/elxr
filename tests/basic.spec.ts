@@ -1,5 +1,6 @@
 import { jlog } from '../src/utils'
 import { filter, matchAll } from '../src'
+import {takeLeftWhile} from 'fp-ts/Array'
 
 describe('Basic tests', () => {
   it('should do it', () => {
@@ -11,28 +12,52 @@ describe('Basic tests', () => {
     expect(filter(/\s\T/, [1, 0, '4', ''])).toEqual(['4'])
   })
 
-  fit('should do it', () => {
+  it('should do it', () => {
     // jlog(matchAll(/[age \n]+/, [ {}, { age: 1 }, { age: 2 }, { age: 0 }, '' ]))
     // jlog(matchAll(/[age \n]+/, [ {}, { age: 1 }, '' ]))
-    // jlog(matchAll(/([age \T][age \n])+/, [ {}, { age: 1 }, { age: 2 }, { age: 0 }, '' ]))
+    // jlog(matchAll(/([age \n])+/, [ {}, { age: 1 }, { age: 2 }, { age: 0 }, '' ]))
 
-    expect(matchAll(/\n/, ['b', 1, 2, 'a', 3]).groups).toEqual([
-      { value: 1, index: 1 },
-      { value: 2, index: 2 },
-      { value: 3, index: 4 },
-    ])
-    expect(matchAll(/\n\T/, [1, 0, 2, '4', '']).groups).toEqual([
-      { value: 1, index: 0 },
-      { value: 2, index: 2 },
-    ])
-    expect(
-      matchAll(/[age \n][age \T]/, [{}, { age: 1 }, { age: 2 }, { age: 0 }, ''])
-        .groups,
-    ).toEqual([
-      { value: { age: 1 }, index: 1 },
-      { value: { age: 2 }, index: 2 },
-    ])
+    // jlog(matchAll(/\n+/, [ '', 1, 2, 0, '6', 5, '' ]))
 
-    // jlog(matchAll(/\n+/, [ '', 1, 2, 0, '', 5, '' ]))
+    // jlog(takeLeftWhile((x: number) => x < 5)([1, 2, 3, 4, 5, 6]))
+  })
+
+  describe('matchAll', () => {
+    it('should match simple expression', () => {
+      expect(matchAll(/\n/, ['b', 1, 2, 'a', 3]).groups).toEqual([
+        { value: 1, index: 1 },
+        { value: 2, index: 2 },
+        { value: 3, index: 4 },
+      ])
+    })
+
+    it('should match simple expression (AND)', () => {
+      expect(matchAll(/\n\T/, [1, 0, 2, '4', '']).groups).toEqual([
+        { value: 1, index: 0 },
+        { value: 2, index: 2 },
+      ])
+    })
+
+    it('should match object property matchers', () => {
+      expect(
+        matchAll(/[age \n][age \T]/, [{}, { age: 1 }, { age: 2 }, { age: 0 }, ''])
+          .groups,
+      ).toEqual([
+        { value: { age: 1 }, index: 1 },
+        { value: { age: 2 }, index: 2 },
+      ])
+    })
+
+    it('should match object property matchers', () => {
+      // FIXME: This is invalid match result
+      expect(
+        matchAll(/([age \n][age \T])+/, [{}, { age: 1 }, { age: 2 }, { age: 0 }, ''])
+          .groups,
+      ).toEqual([
+        { value: [{ age: 1 }, { age: 2 }], index: 1 },
+        { value: [{ age: 2 }], index: 2 },
+      ])
+    })
+
   })
 })
