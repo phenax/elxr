@@ -9,7 +9,7 @@ import {
   Option,
   some,
 } from 'fp-ts/lib/Option'
-import { Expr, ListExpr } from '../types'
+import { Expr, ListExpr, Literal } from '../types'
 import { match } from '../utils'
 
 export interface MatchGroupIndexed<T = any> {
@@ -33,7 +33,9 @@ const checkExpr = <T>(
   item: T,
   list: T[],
   index: number,
-  skip: (n: index) => (m: MatchGroupIndexed<T | T[]>[]) => MatchGroupIndexed<T | T[]>[] = _ =>
+  skip: (
+    n: index,
+  ) => (m: MatchGroupIndexed<T | T[]>[]) => MatchGroupIndexed<T | T[]>[] = _ =>
     identity,
 ): MatchGroupIndexed<T | T[]>[] => {
   return pipe(
@@ -48,6 +50,11 @@ const checkExpr = <T>(
         pipe(typeof item === 'boolean' ? [group(item, index)] : [], skip(1)),
       Truthy: _ => pipe(!!item ? [group(item, index)] : [], skip(1)),
       Falsey: _ => pipe(!item ? [group(item, index)] : [], skip(1)),
+      Literal: literal =>
+        pipe(
+          (literal.value as any) === item ? [group(item, index)] : [],
+          skip(1),
+        ),
 
       Group: ({ exprs }) => {
         const [head, ...tail] = exprs
@@ -90,7 +97,10 @@ const checkExpr = <T>(
           list,
           takeLeftWhile(a => checkExpr(expr, a, list, index).length > 0),
         )
-        return pipe(matches.length > 0 ? [group(matches, index)] : [], skip(matches.length || 1))
+        return pipe(
+          matches.length > 0 ? [group(matches, index)] : [],
+          skip(matches.length || 1),
+        )
       },
 
       _: _ => [],

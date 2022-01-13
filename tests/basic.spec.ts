@@ -16,31 +16,22 @@ describe('Basic tests', () => {
     // jlog(matchAll(/[age \n]+/, [ {}, { age: 1 }, '' ]))
     // jlog(matchAll(/([age \n])+/, [ {}, { age: 1 }, { age: 2 }, { age: 0 }, '' ]))
     // jlog(matchAll(/\n+/, [ '', 1, 2, 0, '6', 5, '' ]))
-    // jlog(takeLeftWhile((x: number) => x < 5)([1, 2, 3, 4, 5, 6]))
 
-    jlog(
-      matchAll(/ [num \n\T]+ /, [
-        null,
-        { num: 1 },
-        { num: 2 },
-        {},
-        { num: 0 },
-        { num: 3 },
-      ]),
-    )
-
-    jlog(
-      matchAll(/([age \n][age \T])+/, [
-        {},
-        { age: 1 },
-        { age: 2 },
-        { age: 0 },
-        '',
-      ]).groups,
-    )
+    //jlog(matchAll(/ -2.05 /, [ 2, -2.05, 5, -2.05, 2.05, 0.05, 'wow', '-2.05', '-2' ]))
   })
 
   describe('matchAll', () => {
+    it ('should match literals', () => {
+      expect(matchAll(/ -2.05 /, [ 2, NaN, -2.05, '-2.05', -2.05, 2.05 ]).groups).toEqual([
+        { value: -2.05, index: 2 },
+        { value: -2.05, index: 4 },
+      ])
+      expect(matchAll(/ true /, [ 1, true, false, true, 'true' ]).groups).toEqual([
+        { value: true, index: 1 },
+        { value: true, index: 3 },
+      ])
+    })
+
     it('should match simple expression', () => {
       expect(matchAll(/\n/, ['b', 1, 2, 'a', 3]).groups).toEqual([
         { value: 1, index: 1 },
