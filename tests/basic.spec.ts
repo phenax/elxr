@@ -16,20 +16,22 @@ describe('Basic tests', () => {
     // jlog(matchAll(/[age \n]+/, [ {}, { age: 1 }, '' ]))
     // jlog(matchAll(/([age \n])+/, [ {}, { age: 1 }, { age: 2 }, { age: 0 }, '' ]))
     // jlog(matchAll(/\n+/, [ '', 1, 2, 0, '6', 5, '' ]))
-
-    jlog(matchAll(/ -2.05|2|true|\s|\T /, [ 2, -2.05, 5, -2.05, 2.05, 0.05, 'wow', '-2.05', '-2' ]))
   })
 
   describe('matchAll', () => {
-    it ('should match literals', () => {
-      expect(matchAll(/ -2.05 /, [ 2, NaN, -2.05, '-2.05', -2.05, 2.05 ]).groups).toEqual([
+    it('should match literals', () => {
+      expect(
+        matchAll(/ -2.05 /, [2, NaN, -2.05, '-2.05', -2.05, 2.05]).groups,
+      ).toEqual([
         { value: -2.05, index: 2 },
         { value: -2.05, index: 4 },
       ])
-      expect(matchAll(/ true /, [ 1, true, false, true, 'true' ]).groups).toEqual([
-        { value: true, index: 1 },
-        { value: true, index: 3 },
-      ])
+      expect(matchAll(/ true /, [1, true, false, true, 'true']).groups).toEqual(
+        [
+          { value: true, index: 1 },
+          { value: true, index: 3 },
+        ],
+      )
     })
 
     it('should match simple expression', () => {
@@ -85,6 +87,37 @@ describe('Basic tests', () => {
       ).toEqual([
         { value: [{ num: 1 }, { num: 2 }], index: 1 },
         { value: [{ num: 3 }], index: 5 },
+      ])
+    })
+
+    it('should match alternatives', () => {
+      expect(
+        matchAll(/ -2.01|true|\s\T /, [-2.01, true, false, 'foobar', ''])
+          .groups,
+      ).toEqual([
+        { value: -2.01, index: 0 },
+        { value: true, index: 1 },
+        { value: 'foobar', index: 3 },
+      ])
+
+      expect(
+        matchAll(/ [v 1|2|\s\T|3]+ /, [
+          { v: 1 },
+          { v: 3 },
+          { v: 2 },
+          null,
+          { v: 3 },
+          { v: 2 },
+          { v: 'wow' },
+          { v: '' },
+          2,
+          3,
+          { v: 1 },
+        ]).groups,
+      ).toEqual([
+        { value: [{ v: 1 }, { v: 3 }, { v: 2 }], index: 0 },
+        { value: [{ v: 3 }, { v: 2 }, { v: 'wow' }], index: 4 },
+        { value: [{ v: 1 }], index: 10 },
       ])
     })
   })

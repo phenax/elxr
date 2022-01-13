@@ -82,6 +82,14 @@ const checkExpr = <T>(
         )
       },
 
+      Or: ({ exprs }) => {
+        const match = exprs.find(expr => checkExpr(expr, item, list, index).length > 0)
+        return pipe(
+          match ? [group(item, index)] : [],
+          skip(1),
+        )
+      },
+
       PropertyMatch: ({ name, expr }) =>
         pipe(
           Object.prototype.hasOwnProperty.call(item ?? {}, name)
@@ -102,13 +110,6 @@ const checkExpr = <T>(
           skip(matches.length || 1),
         )
       },
-
-      // Or: ({ left, right }) => {
-      //   return pipe(
-      //     [],
-      //     skip(1),
-      //   )
-      // },
 
       _: _ => { throw new Error(`TODO: ${expr.tag} not implemented for match`) },
     }),

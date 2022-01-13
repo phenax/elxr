@@ -16,7 +16,6 @@ export type Expr = Union<{
   Optional: { expr: Expr },
   OneOrMore: { expr: Expr },
   ZeroOrMore: { expr: Expr },
-  NextItem: _,
   AnyItem: _,
   Or: { exprs: Expr[] },
   AnyString: _,
@@ -27,6 +26,7 @@ export type Expr = Union<{
   Group: { exprs: Expr[] },
   PropertyMatch: { name: string, expr: Expr },
   Literal: Literal,
+  NextItem: _,
 }>
 export const Expr = constructors<Expr>()
 
