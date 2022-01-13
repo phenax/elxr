@@ -13,7 +13,7 @@ describe('Eval', () => {
       [
         Expr.OneOrMore({
           expr: Expr.Group({
-            exprs: [Expr.AnyNumber(null), Expr.Truthy(null)],
+            exprs: [Expr.AnyNumber(), Expr.Truthy()],
           }),
         }),
       ],
@@ -28,14 +28,14 @@ describe('Eval', () => {
 
     const liexp: ListExpr = [
       none,
-      [Expr.AnyNumber(null), Expr.Truthy(null)],
+      [Expr.AnyNumber(), Expr.Truthy()],
       none,
     ]
     expect(find(liexp, list)).toEqual([1, 3, 5])
 
     const liexp2: ListExpr = [
       none,
-      [Expr.Falsey(null), Expr.Truthy(null)],
+      [Expr.Falsey(), Expr.Truthy()],
       none,
     ]
     expect(find(liexp2, list)).toEqual([])
@@ -47,8 +47,8 @@ describe('Eval', () => {
     const liexp: ListExpr = [
       none,
       [
-        Expr.AnyItem(null),
-        Expr.Group({ exprs: [Expr.AnyNumber(null), Expr.Truthy(null)] }),
+        Expr.AnyItem(),
+        Expr.Group({ exprs: [Expr.AnyNumber(), Expr.Truthy()] }),
       ],
       none,
     ]
@@ -69,9 +69,9 @@ describe('Eval', () => {
       [
         Expr.PropertyMatch({
           name: 'name',
-          exprs: [Expr.AnyString(null), Expr.Truthy(null)],
+          exprs: [Expr.AnyString(), Expr.Truthy()],
         }),
-        Expr.PropertyMatch({ name: 'age', exprs: [Expr.AnyNumber(null)] }),
+        Expr.PropertyMatch({ name: 'age', exprs: [Expr.AnyNumber()] }),
       ],
       none,
     ]
@@ -84,7 +84,7 @@ describe('Eval', () => {
 
     const liexp: ListExpr = [
       none,
-      [Expr.OneOrMore({ expr: Expr.AnyNumber(null) })],
+      [Expr.OneOrMore({ expr: Expr.AnyNumber() })],
       none,
     ]
     expect(find(liexp, list)).toEqual([1, 3, 5])

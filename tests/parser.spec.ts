@@ -33,15 +33,15 @@ describe('Foobar', () => {
     expect(parser(/^ .\s(\n)\b  \T $/.source)).toEqual(
       right([
         [
-          some(Expr.Start(null)),
+          some(Expr.Start()),
           [
-            Expr.AnyItem(null),
-            Expr.AnyString(null),
-            Expr.Group({ exprs: [Expr.AnyNumber(null)] }),
-            Expr.AnyBool(null),
-            Expr.Truthy(null),
+            Expr.AnyItem(),
+            Expr.AnyString(),
+            Expr.Group({ exprs: [Expr.AnyNumber()] }),
+            Expr.AnyBool(),
+            Expr.Truthy(),
           ],
-          some(Expr.End(null)),
+          some(Expr.End()),
         ],
         '',
       ]),
@@ -50,13 +50,13 @@ describe('Foobar', () => {
     expect(parser(/^ \s* \T? \n+ $/.source)).toEqual(
       right([
         [
-          some(Expr.Start(null)),
+          some(Expr.Start()),
           [
-            Expr.ZeroOrMore({ expr: Expr.AnyString(null) }),
-            Expr.Optional({ expr: Expr.Truthy(null) }),
-            Expr.OneOrMore({ expr: Expr.AnyNumber(null) }),
+            Expr.ZeroOrMore({ expr: Expr.AnyString() }),
+            Expr.Optional({ expr: Expr.Truthy() }),
+            Expr.OneOrMore({ expr: Expr.AnyNumber() }),
           ],
-          some(Expr.End(null)),
+          some(Expr.End()),
         ],
         '',
       ]),
@@ -68,12 +68,12 @@ describe('Foobar', () => {
           none,
           [
             Expr.Or({
-              left: Expr.AnyString(null),
+              left: Expr.AnyString(),
               right: [
-                Expr.AnyBool(null),
+                Expr.AnyBool(),
                 Expr.Or({
-                  left: Expr.Truthy(null),
-                  right: [Expr.AnyNumber(null)],
+                  left: Expr.Truthy(),
+                  right: [Expr.AnyNumber()],
                 }),
               ],
             }),
@@ -93,9 +93,9 @@ describe('Foobar', () => {
           [
             Expr.PropertyMatch({
               name: 'name',
-              exprs: [Expr.AnyString(null), Expr.Truthy(null)],
+              exprs: [Expr.AnyString(), Expr.Truthy()],
             }),
-            Expr.PropertyMatch({ name: 'age', exprs: [Expr.AnyNumber(null)] }),
+            Expr.PropertyMatch({ name: 'age', exprs: [Expr.AnyNumber()] }),
           ],
           none,
         ],

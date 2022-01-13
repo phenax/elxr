@@ -20,15 +20,15 @@ import {
 } from './utils'
 import { Expr, ListExpr } from '../types'
 
-const start = mapTo(symbol('^'), _ => Expr.Start(null))
-const end = mapTo(symbol('$'), _ => Expr.End(null))
-const anyItem = mapTo(symbol('.'), _ => Expr.AnyItem(null))
-const nextItem = mapTo(symbol(','), _ => Expr.NextItem(null))
-const anyString = mapTo(symbol('\\s'), _ => Expr.AnyString(null))
-const anyNumber = mapTo(symbol('\\n'), _ => Expr.AnyNumber(null))
-const anyBool = mapTo(symbol('\\b'), _ => Expr.AnyBool(null))
-const truthy = mapTo(symbol('\\T'), _ => Expr.Truthy(null))
-const falsey = mapTo(symbol('\\F'), _ => Expr.Falsey(null))
+const start = mapTo(symbol('^'), _ => Expr.Start())
+const end = mapTo(symbol('$'), _ => Expr.End())
+const anyItem = mapTo(symbol('.'), _ => Expr.AnyItem())
+const nextItem = mapTo(symbol(','), _ => Expr.NextItem())
+const anyString = mapTo(symbol('\\s'), _ => Expr.AnyString())
+const anyNumber = mapTo(symbol('\\n'), _ => Expr.AnyNumber())
+const anyBool = mapTo(symbol('\\b'), _ => Expr.AnyBool())
+const truthy = mapTo(symbol('\\T'), _ => Expr.Truthy())
+const falsey = mapTo(symbol('\\F'), _ => Expr.Falsey())
 
 const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> = chain(
   ([expr, input]) =>
