@@ -1,5 +1,5 @@
 import { identity, pipe } from 'fp-ts/function'
-import { takeLeftWhile, zip } from 'fp-ts/lib/Array'
+import { filter, takeLeftWhile, zip, zipWith } from 'fp-ts/lib/Array'
 import {
   chain,
   getOrElseW,
@@ -35,9 +35,9 @@ const checkExpr = <T>(
   index: number,
   skip: (
     n: index,
-  ) => (m: MatchGroupIndexed<T | T[]>[]) => MatchGroupIndexed<T | T[]>[] = _ =>
+  ) => (m: MatchGroupIndexed<any>[]) => MatchGroupIndexed<any>[] = _ =>
     identity,
-): MatchGroupIndexed<T | T[]>[] => {
+): MatchGroupIndexed<any>[] => {
   return pipe(
     expr,
     match<MatchGroupIndexed<any>[], Expr>({
@@ -108,6 +108,26 @@ const checkExpr = <T>(
         return pipe(
           matches.length > 0 ? [group(matches, index)] : [],
           skip(matches.length || 1),
+        )
+      },
+
+      Sequence: ({ exprs }) => {
+        const getGroups = () => {
+          if (exprs.length > list.length) return []
+
+          const indexed = <T>(ls: T[]): Array<[number, T]> => ls.map((x, i) => [i, x])
+          const result = pipe(
+            zipWith(exprs, indexed(list), (expr, [i, val]) => checkExpr(expr, val, list, index + i)),
+            filter(matches => !!matches.length),
+          )
+          if (result.length !== exprs.length) return []
+
+          return [group(result, index)]
+        };
+
+        return pipe(
+          getGroups(),
+          skip(exprs.length || 1),
         )
       },
 

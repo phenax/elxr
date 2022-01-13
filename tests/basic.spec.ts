@@ -120,5 +120,15 @@ describe('Basic tests', () => {
         { value: [{ v: 1 }], index: 10 },
       ])
     })
+
+    it('should match sequence of matchers', () => {
+      expect(
+        matchAll(/ true, \n, \s /, [true, 5, 'five', 1, 2, 3, true, 7, 'seven'])
+          .groups,
+      ).toEqual([
+        { value: [ [{ value: true, index: 0 }], [{ value: 5, index: 1 }], [{ value: 'five', index: 2 }] ], index: 0 },
+        { value: [ [{ value: true, index: 6 }], [{ value: 7, index: 7 }], [{ value: 'seven', index: 8 }] ], index: 6 },
+      ])
+    })
   })
 })
