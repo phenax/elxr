@@ -11,13 +11,11 @@ import { parser } from '../src/parser'
 import { none, some } from 'fp-ts/Option'
 import { Expr, Literal } from '../src/types'
 import { jlog } from '../src/utils'
+import { parse } from 'fp-ts/lib/Json'
 
-const wrap = (e: Expr) =>
-  right([[none, e, none], ''])
-const grouped = (l: Expr[]) =>
-  wrap(Expr.Group({ exprs: l }))
-const groupedAlt = (l: Expr[]) =>
-  wrap(Expr.Or({ exprs: l }))
+const wrap = (e: Expr) => right([[none, e, none], ''])
+const grouped = (l: Expr[]) => wrap(Expr.Group({ exprs: l }))
+const groupedAlt = (l: Expr[]) => wrap(Expr.Or({ exprs: l }))
 
 describe('Parser', () => {
   it('should do shit', () => {
@@ -84,6 +82,17 @@ describe('Parser', () => {
         Expr.AnyNumber(),
       ]),
     )
+    expect(parser(/ ((\s|\b\T)|\n) /.source)).toEqual(
+      groupedAlt([
+        Expr.Or({
+          exprs: [
+            Expr.AnyString(),
+            Expr.Group({ exprs: [Expr.AnyBool(), Expr.Truthy()] }),
+          ]
+        }),
+        Expr.AnyNumber(),
+      ]),
+    )
   })
 
   it('object proprtyu', () => {
@@ -106,9 +115,7 @@ describe('Parser', () => {
     expect(parser(/ 0.105 /.source)).toEqual(
       wrap(Expr.Literal(Literal.Number(0.105))),
     )
-    expect(parser(/ 9 /.source)).toEqual(
-      wrap(Expr.Literal(Literal.Number(9))),
-    )
+    expect(parser(/ 9 /.source)).toEqual(wrap(Expr.Literal(Literal.Number(9))))
     expect(parser(/ 23 /.source)).toEqual(
       wrap(Expr.Literal(Literal.Number(23))),
     )
@@ -133,6 +140,20 @@ describe('Parser', () => {
     )
     expect(parser(/ false /.source)).toEqual(
       wrap(Expr.Literal(Literal.Boolean(false))),
+    )
+  })
+
+  it('sequence of values', () => {
+    expect(parser(/true, \s\T, \n/.source)).toEqual(
+      wrap(
+        Expr.Sequence({
+          exprs: [
+            Expr.Literal(Literal.Boolean(true)),
+            Expr.Group({ exprs: [Expr.AnyString(), Expr.Truthy()] }),
+            Expr.AnyNumber(),
+          ],
+        }),
+      ),
     )
   })
 })

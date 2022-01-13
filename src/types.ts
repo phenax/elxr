@@ -26,7 +26,7 @@ export type Expr = Union<{
   Group: { exprs: Expr[] },
   PropertyMatch: { name: string, expr: Expr },
   Literal: Literal,
-  NextItem: _,
+  Sequence: { exprs: Expr[] },
 }>
 export const Expr = constructors<Expr>()
 
