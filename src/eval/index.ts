@@ -33,9 +33,9 @@ const checkExpr = <T>(
   item: T,
   list: T[],
   index: number,
-  skip: (n: index) => (m: MatchGroupIndexed<T | T[]>[]) => typeof m = _ =>
+  skip: (n: index) => (m: MatchGroupIndexed<T | T[]>[]) => MatchGroupIndexed<T | T[]>[] = _ =>
     identity,
-): MatchGroupIndexed<T>[] => {
+): MatchGroupIndexed<T | T[]>[] => {
   return pipe(
     expr,
     match<MatchGroupIndexed<any>[], Expr>({
@@ -51,25 +51,27 @@ const checkExpr = <T>(
 
       Group: ({ exprs }) => {
         const [head, ...tail] = exprs
+        const skipIndexes = [] as index[]
+        const localSkip = (i: index) => (x: any) => (skipIndexes.push(i), x)
         const matches = tail.reduce(
           (acc, exp) =>
             pipe(
               acc,
               chain(ac =>
                 pipe(
-                  checkExpr(exp, item, list, index),
+                  checkExpr(exp, item, list, index, localSkip),
                   zip(ac),
                   z => z.map(([res, _cur]) => res),
                   z => (z.length === 0 ? none : some(z)),
                 ),
               ),
             ),
-          some(checkExpr(head, item, list, index)),
+          some(checkExpr(head, item, list, index, localSkip)),
         )
         return pipe(
           matches,
           getOrElseW(() => []),
-          skip(1),
+          skip(Math.max(...skipIndexes) || 1),
         )
       },
 
@@ -88,7 +90,7 @@ const checkExpr = <T>(
           list,
           takeLeftWhile(a => checkExpr(expr, a, list, index).length > 0),
         )
-        return pipe(matches.length > 0 ? [group(matches, index)] : [], skip(1))
+        return pipe(matches.length > 0 ? [group(matches, index)] : [], skip(matches.length || 1))
       },
 
       _: _ => [],

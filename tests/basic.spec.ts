@@ -1,9 +1,8 @@
 import { jlog } from '../src/utils'
 import { filter, matchAll } from '../src'
-import { takeLeftWhile } from 'fp-ts/Array'
 
 describe('Basic tests', () => {
-  it('should do it', () => {
+  it('should filter shit', () => {
     expect(filter(/\s/, [1, '2', 3, '4'])).toEqual(['2', '4'])
     expect(filter(/\n/, [1, '2', 3, '4'])).toEqual([1, 3])
     expect(filter(/\T/, [1, 0, '4', ''])).toEqual([1, '4'])
@@ -18,6 +17,16 @@ describe('Basic tests', () => {
     // jlog(matchAll(/([age \n])+/, [ {}, { age: 1 }, { age: 2 }, { age: 0 }, '' ]))
     // jlog(matchAll(/\n+/, [ '', 1, 2, 0, '6', 5, '' ]))
     // jlog(takeLeftWhile((x: number) => x < 5)([1, 2, 3, 4, 5, 6]))
+
+    jlog(
+      matchAll(/([age \n][age \T])+/, [
+        {},
+        { age: 1 },
+        { age: 2 },
+        { age: 0 },
+        '',
+      ]).groups,
+    )
   })
 
   describe('matchAll', () => {
@@ -52,16 +61,6 @@ describe('Basic tests', () => {
     })
 
     it('should match object property matchers', () => {
-      // FIXME: This is invalid match result
-      jlog(
-        matchAll(/([age \n][age \T])+/, [
-          {},
-          { age: 1 },
-          { age: 2 },
-          { age: 0 },
-          '',
-        ]).groups,
-      )
       expect(
         matchAll(/([age \n][age \T])+/, [
           {},
@@ -72,7 +71,6 @@ describe('Basic tests', () => {
         ]).groups,
       ).toEqual([
         { value: [{ age: 1 }, { age: 2 }], index: 1 },
-        { value: [{ age: 2 }], index: 2 },
       ])
     })
   })
