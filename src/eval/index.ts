@@ -1,4 +1,4 @@
-import { pipe } from 'fp-ts/function'
+import { identity, pipe } from 'fp-ts/function'
 import { takeLeftWhile, zip } from 'fp-ts/lib/Array'
 import {
   chain,
@@ -26,21 +26,28 @@ const group = <T>(value: T, index: number): MatchGroupIndexed<T> => ({
   index,
 })
 
+type index = number
+
 const checkExpr = <T>(
   expr: Expr,
   item: T,
   list: T[],
   index: number,
+  skip: (n: index) => (m: MatchGroupIndexed<T | T[]>[]) => typeof m = _ =>
+    identity,
 ): MatchGroupIndexed<T>[] => {
   return pipe(
     expr,
     match<MatchGroupIndexed<any>[], Expr>({
-      AnyItem: _ => [group(item, index)],
-      AnyNumber: _ => (typeof item === 'number' ? [group(item, index)] : []),
-      AnyString: _ => (typeof item === 'string' ? [group(item, index)] : []),
-      AnyBool: _ => (typeof item === 'boolean' ? [group(item, index)] : []),
-      Truthy: _ => (!!item ? [group(item, index)] : []),
-      Falsey: _ => (!item ? [group(item, index)] : []),
+      AnyItem: _ => pipe([group(item, index)], skip(1)),
+      AnyNumber: _ =>
+        pipe(typeof item === 'number' ? [group(item, index)] : [], skip(1)),
+      AnyString: _ =>
+        pipe(typeof item === 'string' ? [group(item, index)] : [], skip(1)),
+      AnyBool: _ =>
+        pipe(typeof item === 'boolean' ? [group(item, index)] : [], skip(1)),
+      Truthy: _ => pipe(!!item ? [group(item, index)] : [], skip(1)),
+      Falsey: _ => pipe(!item ? [group(item, index)] : [], skip(1)),
 
       Group: ({ exprs }) => {
         const [head, ...tail] = exprs
@@ -62,6 +69,7 @@ const checkExpr = <T>(
         return pipe(
           matches,
           getOrElseW(() => []),
+          skip(1),
         )
       },
 
@@ -71,6 +79,7 @@ const checkExpr = <T>(
             ? checkExpr(Expr.Group({ exprs }), item[name], list, index)
             : [],
           res => (res.length > 0 ? [group(item, index)] : []), // FIXME: doesn't allow nested matching
+          skip(1),
         ),
 
       OneOrMore: ({ expr }) => {
@@ -79,7 +88,7 @@ const checkExpr = <T>(
           list,
           takeLeftWhile(a => checkExpr(expr, a, list, index).length > 0),
         )
-        return matches.length > 0 ? [group(matches, index)] : []
+        return pipe(matches.length > 0 ? [group(matches, index)] : [], skip(1))
       },
 
       _: _ => [],
@@ -87,7 +96,6 @@ const checkExpr = <T>(
   )
 }
 
-// :: ListExpr -> [a] -> [{ groups: [T] }]
 export const matchAll = <T>(
   [startO, exprs, endO]: ListExpr,
   list: T[],
@@ -95,26 +103,14 @@ export const matchAll = <T>(
   const check = (index: number, ls: T[], expr: Expr): MatchGroupIndexed[] => {
     if (ls.length === 0) return []
 
-    const [item, ...rest] = ls
+    const [item] = ls
 
     const next =
       (i: number = 1) =>
       (curMatch: MatchGroupIndexed[]) =>
         [...curMatch, ...check(index + i, ls.slice(i), expr)]
 
-    return pipe(
-      expr,
-      match<MatchGroupIndexed<any>[], Expr>({
-        OneOrMore: ({ expr }) => {
-          return pipe(
-            checkExpr(expr, item, ls, index),
-            matches => next(1)(matches), // matches.length || 
-          )
-        },
-
-        _: _ => pipe(checkExpr(expr, item, ls, index), next()),
-      }),
-    )
+    return checkExpr(expr, item, ls, index, next)
   }
 
   const expr = Expr.Group({ exprs })
