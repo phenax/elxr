@@ -103,13 +103,20 @@ const checkExpr = <T>(
         )
       },
 
-      _: _ => [],
+      // Or: ({ left, right }) => {
+      //   return pipe(
+      //     [],
+      //     skip(1),
+      //   )
+      // },
+
+      _: _ => { throw new Error(`TODO: ${expr.tag} not implemented for match`) },
     }),
   )
 }
 
 export const matchAll = <T>(
-  [startO, exprs, endO]: ListExpr,
+  [startO, expr, endO]: ListExpr,
   list: T[],
 ): MatchGroupResult => {
   const check = (index: number, ls: T[], expr: Expr): MatchGroupIndexed[] => {
@@ -125,14 +132,12 @@ export const matchAll = <T>(
     return checkExpr(expr, item, ls, index, next)
   }
 
-  const expr = Expr.Group({ exprs })
-
   return {
     groups: check(0, list, expr),
   }
 }
 
-export const find = <T>([startO, exprs, endO]: ListExpr, list: T[]): any => {
+export const find = <T>([startO, expr, endO]: ListExpr, list: T[]): any => {
   const check =
     (expr: Expr) =>
     <T>(x: T, i: number, ls: T[]): boolean => {
@@ -161,7 +166,5 @@ export const find = <T>([startO, exprs, endO]: ListExpr, list: T[]): any => {
       )
     }
 
-  const cs = exprs.map(check)
-
-  return list.filter((x, i, ls) => cs.every(c => c(x, i, ls)))
+  return list.filter((x, i, ls) => check(expr)(x, i, ls))
 }

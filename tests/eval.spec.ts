@@ -10,13 +10,11 @@ describe('Eval', () => {
 
     const liexp: ListExpr = [
       none,
-      [
-        Expr.OneOrMore({
-          expr: Expr.Group({
-            exprs: [Expr.AnyNumber(), Expr.Truthy()],
-          }),
+      Expr.OneOrMore({
+        expr: Expr.Group({
+          exprs: [Expr.AnyNumber(), Expr.Truthy()],
         }),
-      ],
+      }),
       none,
     ]
 
@@ -26,10 +24,10 @@ describe('Eval', () => {
   it('basic evaluation', () => {
     const list = [0, 1, '2', 3, [4], 5]
 
-    const liexp: ListExpr = [none, [Expr.AnyNumber(), Expr.Truthy()], none]
+    const liexp: ListExpr = [none, Expr.Group({ exprs: [Expr.AnyNumber(), Expr.Truthy()] }), none]
     expect(find(liexp, list)).toEqual([1, 3, 5])
 
-    const liexp2: ListExpr = [none, [Expr.Falsey(), Expr.Truthy()], none]
+    const liexp2: ListExpr = [none, Expr.Group({ exprs: [Expr.Falsey(), Expr.Truthy()] }), none]
     expect(find(liexp2, list)).toEqual([])
   })
 
@@ -38,10 +36,10 @@ describe('Eval', () => {
 
     const liexp: ListExpr = [
       none,
-      [
+      Expr.Group({ exprs: [
         Expr.AnyItem(),
         Expr.Group({ exprs: [Expr.AnyNumber(), Expr.Truthy()] }),
-      ],
+      ] }),
       none,
     ]
     expect(find(liexp, list)).toEqual([1, 3, 5])
@@ -58,7 +56,7 @@ describe('Eval', () => {
 
     const liexp: ListExpr = [
       none,
-      [
+      Expr.Group({ exprs: [
         Expr.PropertyMatch({
           name: 'name',
           expr: Expr.Group({ exprs: [Expr.AnyString(), Expr.Truthy()] }),
@@ -67,21 +65,10 @@ describe('Eval', () => {
           name: 'age',
           expr: Expr.Group({ exprs: [Expr.AnyNumber()] }),
         }),
-      ],
+      ] }),
       none,
     ]
 
     expect(find(liexp, list)).toEqual([{ name: 'gello', age: 20 }])
-  })
-
-  xit('with groups', () => {
-    const list = [0, 1, 1, 1, '2', 3, 4, [4], 5, '']
-
-    const liexp: ListExpr = [
-      none,
-      [Expr.OneOrMore({ expr: Expr.AnyNumber() })],
-      none,
-    ]
-    expect(find(liexp, list)).toEqual([1, 3, 5])
   })
 })

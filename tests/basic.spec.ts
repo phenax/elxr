@@ -17,7 +17,7 @@ describe('Basic tests', () => {
     // jlog(matchAll(/([age \n])+/, [ {}, { age: 1 }, { age: 2 }, { age: 0 }, '' ]))
     // jlog(matchAll(/\n+/, [ '', 1, 2, 0, '6', 5, '' ]))
 
-    //jlog(matchAll(/ -2.05 /, [ 2, -2.05, 5, -2.05, 2.05, 0.05, 'wow', '-2.05', '-2' ]))
+    jlog(matchAll(/ -2.05|2|true|\s|\T /, [ 2, -2.05, 5, -2.05, 2.05, 0.05, 'wow', '-2.05', '-2' ]))
   })
 
   describe('matchAll', () => {

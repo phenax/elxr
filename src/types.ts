@@ -18,7 +18,7 @@ export type Expr = Union<{
   ZeroOrMore: { expr: Expr },
   NextItem: _,
   AnyItem: _,
-  Or: { left: Expr, right: Expr[] },
+  Or: { exprs: Expr[] },
   AnyString: _,
   AnyNumber: _,
   AnyBool: _,
@@ -32,7 +32,7 @@ export const Expr = constructors<Expr>()
 
 export type ListExpr = [
   Option<Expr>,
-  Expr[],
+  Expr,
   Option<Expr>,
 ]
 

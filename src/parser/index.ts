@@ -1,5 +1,5 @@
 import { flow, pipe } from 'fp-ts/function'
-import { chain, left, orElse, right } from 'fp-ts/lib/Either'
+import { chain, map as mapE, left, orElse, right } from 'fp-ts/lib/Either'
 import {
   delimited,
   digits,
@@ -15,6 +15,7 @@ import {
   ParserResult,
   prefixed,
   satifyChar,
+  sepBy1,
   suffixed,
   symbol,
   tuple3,
@@ -22,7 +23,7 @@ import {
 } from './utils'
 import { Expr, ListExpr, Literal } from '../types'
 import {getOrElse, map} from 'fp-ts/lib/Option'
-import {snd} from 'fp-ts/lib/Tuple'
+import {mapFst, snd} from 'fp-ts/lib/Tuple'
 
 const start = mapTo(symbol('^'), _ => Expr.Start())
 const end = mapTo(symbol('$'), _ => Expr.End())
@@ -47,17 +48,6 @@ const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> = chain(
     ),
 )
 
-const wrapAlt: (e: ParserResult<Expr>) => ParserResult<Expr> = chain(
-  ([expr, input]) =>
-    pipe(
-      input,
-      mapTo(prefixed(symbol('|'), many1(expressionP)), rest =>
-        Expr.Or({ left: expr, right: rest }),
-      ),
-      orElse(_ => right([expr, input])),
-    ),
-)
-
 const propRegex = /^[A-Za-z0-9_-]$/
 
 export const propertyName: Parser<string> = pipe(
@@ -76,7 +66,7 @@ const objectProperty = (input: string) =>
         pair(propertyName, many0(expressionP)),
         symbol(']'),
       ),
-      ([name, exprs]) => Expr.PropertyMatch({ name, expr: Expr.Group({ exprs }) }),
+      ([name, exprs]) => Expr.PropertyMatch({ name, expr: exprsToGroup(exprs) }),
     ),
   )
 
@@ -111,13 +101,17 @@ const literalP: Parser<Literal> = delimited(
   whitespaces0,
 )
 
-const expressionP: Parser<Expr> = (input: string) =>
+const expressionP: Parser<Expr> = (input: string) => pipe(
+  input,
+  sepBy1(symbol('|'), groupP),
+  mapE(mapFst(exprs => exprs.length === 1 ? exprs[0] : Expr.Or({ exprs }))),
+)
+
+const atomP: Parser<Expr> = (input: string) =>
   pipe(
     input,
     or([
-      mapTo(delimited(symbol('('), many1(expressionP), symbol(')')), exprs =>
-        Expr.Group({ exprs }),
-      ),
+      mapTo(delimited(symbol('('), many1(expressionP), symbol(')')), exprsToGroup),
       objectProperty,
       nextItem,
       anyItem,
@@ -129,21 +123,21 @@ const expressionP: Parser<Expr> = (input: string) =>
       mapTo(literalP, Expr.Literal),
     ]),
     wrapQuantifiers,
-    wrapAlt,
+    //wrapAlt,
   )
+
+const exprsToGroup = (exprs: Expr[]) => exprs.length === 1 ? exprs[0] : Expr.Group({ exprs })
+const groupP: Parser<Expr> = mapTo(many1(atomP), exprsToGroup)
 
 export const parser: Parser<ListExpr> = tuple3(
   optional(start),
-  many1(expressionP),
+  expressionP,
   optional(end),
 )
 
 /*
-
 {3,6} => 3 to 6 instances
 (> 5) => number greater than
 (< 5) => number less than
-[name x] => apply x on property `name`
 /x/ => match regular expression (string values in list)
-
 */

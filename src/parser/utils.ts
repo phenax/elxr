@@ -1,4 +1,4 @@
-import { constant, flow, pipe } from 'fp-ts/function'
+import { flow, pipe } from 'fp-ts/function'
 import {
   Either,
   left,
@@ -9,9 +9,10 @@ import {
   fold,
   orElseW,
 } from 'fp-ts/Either'
-import { none, some, Option } from 'fp-ts/Option'
+import { none, some, Option, getOrElse } from 'fp-ts/Option'
 import { fst, mapFst, mapSnd, snd } from 'fp-ts/Tuple'
 import { eq } from '../utils'
+import { prepend } from 'fp-ts/lib/Array'
 
 export type char = string
 
@@ -25,11 +26,19 @@ export const constP =
   (inp: string) =>
     right([v, inp])
 
+export const sepBy1 = <T>(sep: Parser<any>, parser: Parser<T>): Parser<T[]> =>
+  flow(
+    parser,
+    chain(([val, nextInput]) =>
+      pipe(nextInput, many0(prefixed(sep, parser)), map(mapFst(prepend(val)))),
+    ),
+  )
+
 export const many0 = <T>(parser: Parser<T>): Parser<Array<T>> =>
   flow(
     parser,
     chain(([a, nextInput]) =>
-      pipe(nextInput, many0(parser), map(mapFst(ls => [a, ...ls]))),
+      pipe(nextInput, many0(parser), map(mapFst(prepend(a)))),
     ),
     orElse(
       flow(
@@ -134,7 +143,7 @@ export const andThen =
 
 export const optional = <T>(p: Parser<T>): Parser<Option<T>> =>
   flow(
-    p,
+    recoverInput(p),
     fold(
       flow(
         mapFst(_ => none),
