@@ -76,7 +76,7 @@ const objectProperty = (input: string) =>
         pair(propertyName, many0(expressionP)),
         symbol(']'),
       ),
-      ([name, exprs]) => Expr.PropertyMatch({ name, exprs }),
+      ([name, exprs]) => Expr.PropertyMatch({ name, expr: Expr.Group({ exprs }) }),
     ),
   )
 

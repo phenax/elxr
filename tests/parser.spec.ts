@@ -89,9 +89,9 @@ describe('Parser', () => {
       wrap([
         Expr.PropertyMatch({
           name: 'name',
-          exprs: [Expr.AnyString(), Expr.Truthy()],
+          expr: Expr.Group({ exprs: [Expr.AnyString(), Expr.Truthy()] }),
         }),
-        Expr.PropertyMatch({ name: 'age', exprs: [Expr.AnyNumber()] }),
+        Expr.PropertyMatch({ name: 'age', expr: Expr.Group({ exprs: [Expr.AnyNumber()] }) }),
       ]),
     )
   })

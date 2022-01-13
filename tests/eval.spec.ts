@@ -26,18 +26,10 @@ describe('Eval', () => {
   it('basic evaluation', () => {
     const list = [0, 1, '2', 3, [4], 5]
 
-    const liexp: ListExpr = [
-      none,
-      [Expr.AnyNumber(), Expr.Truthy()],
-      none,
-    ]
+    const liexp: ListExpr = [none, [Expr.AnyNumber(), Expr.Truthy()], none]
     expect(find(liexp, list)).toEqual([1, 3, 5])
 
-    const liexp2: ListExpr = [
-      none,
-      [Expr.Falsey(), Expr.Truthy()],
-      none,
-    ]
+    const liexp2: ListExpr = [none, [Expr.Falsey(), Expr.Truthy()], none]
     expect(find(liexp2, list)).toEqual([])
   })
 
@@ -69,9 +61,12 @@ describe('Eval', () => {
       [
         Expr.PropertyMatch({
           name: 'name',
-          exprs: [Expr.AnyString(), Expr.Truthy()],
+          expr: Expr.Group({ exprs: [Expr.AnyString(), Expr.Truthy()] }),
         }),
-        Expr.PropertyMatch({ name: 'age', exprs: [Expr.AnyNumber()] }),
+        Expr.PropertyMatch({
+          name: 'age',
+          expr: Expr.Group({ exprs: [Expr.AnyNumber()] }),
+        }),
       ],
       none,
     ]

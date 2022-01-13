@@ -82,10 +82,10 @@ const checkExpr = <T>(
         )
       },
 
-      PropertyMatch: ({ name, exprs }) =>
+      PropertyMatch: ({ name, expr }) =>
         pipe(
           Object.prototype.hasOwnProperty.call(item ?? {}, name)
-            ? checkExpr(Expr.Group({ exprs }), item[name], list, index)
+            ? checkExpr(expr, item[name], list, index)
             : [],
           res => (res.length > 0 ? [group(item, index)] : []), // FIXME: doesn't allow nested matching
           skip(1),
@@ -146,8 +146,8 @@ export const find = <T>([startO, exprs, endO]: ListExpr, list: T[]): any => {
           Truthy: _ => !!x,
           Falsey: _ => !x,
           Group: ({ exprs }) => exprs.every(e => check(e)(x, i, ls)),
-          PropertyMatch: ({ name, exprs }) =>
-            name in x && exprs.every(e => check(e)(x[name], i, ls)),
+          PropertyMatch: ({ name, expr }) =>
+            name in x && check(expr)(x[name], i, ls),
           OneOrMore: ({ expr }) => {
             // TODO: Nested quantified expression
             const x = pipe(
