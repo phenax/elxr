@@ -19,6 +19,17 @@ describe('Basic tests', () => {
     // jlog(takeLeftWhile((x: number) => x < 5)([1, 2, 3, 4, 5, 6]))
 
     jlog(
+      matchAll(/ [num \n\T]+ /, [
+        null,
+        { num: 1 },
+        { num: 2 },
+        {},
+        { num: 0 },
+        { num: 3 },
+      ]),
+    )
+
+    jlog(
       matchAll(/([age \n][age \T])+/, [
         {},
         { age: 1 },
@@ -69,8 +80,20 @@ describe('Basic tests', () => {
           { age: 0 },
           '',
         ]).groups,
+      ).toEqual([{ value: [{ age: 1 }, { age: 2 }], index: 1 }])
+
+      expect(
+        matchAll(/ [num \n\T]+ /, [
+          null,
+          { num: 1 },
+          { num: 2 },
+          {},
+          { num: 0 },
+          { num: 3 },
+        ]).groups,
       ).toEqual([
-        { value: [{ age: 1 }, { age: 2 }], index: 1 },
+        { value: [{ num: 1 }, { num: 2 }], index: 1 },
+        { value: [{ num: 3 }], index: 5 },
       ])
     })
   })

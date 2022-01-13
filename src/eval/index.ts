@@ -77,7 +77,7 @@ const checkExpr = <T>(
 
       PropertyMatch: ({ name, exprs }) =>
         pipe(
-          Object.prototype.hasOwnProperty.call(item, name)
+          Object.prototype.hasOwnProperty.call(item ?? {}, name)
             ? checkExpr(Expr.Group({ exprs }), item[name], list, index)
             : [],
           res => (res.length > 0 ? [group(item, index)] : []), // FIXME: doesn't allow nested matching
