@@ -10,7 +10,7 @@ import {
   orElseW,
 } from 'fp-ts/Either'
 import { none, some, Option } from 'fp-ts/Option'
-import { mapFst, mapSnd, snd } from 'fp-ts/Tuple'
+import { fst, mapFst, mapSnd, snd } from 'fp-ts/Tuple'
 import { eq } from '../utils'
 
 export type char = string
@@ -46,7 +46,7 @@ export const many1 = <T>(parser: Parser<T>): Parser<Array<T>> =>
       chain(([res, inp]) =>
         res.length > 0
           ? right([res, inp])
-          : left([`many1 failed to parse at ${inp}`, inp]),
+          : left([`many1 failed to parse at '${inp}'`, inp]),
       ),
     ),
   )
@@ -66,21 +66,16 @@ const recoverInput =
     )
 
 export const prefixed = <T>(a: Parser<any>, b: Parser<T>): Parser<T> =>
-  recoverInput(flow(a, chain(flow(snd, b))))
+  recoverInput(mapTo(pair(a, b), snd))
 
 export const suffixed = <T>(a: Parser<T>, b: Parser<any>): Parser<T> =>
-  recoverInput(
-    flow(
-      a,
-      chain(([out, inp]) => pipe(inp, b, map(mapFst(_ => out)))),
-    ),
-  )
+  recoverInput(mapTo(pair(a, b), fst))
 
 export const delimited = <T>(
   p: Parser<any>,
   a: Parser<T>,
   s: Parser<any>,
-): Parser<T> => recoverInput(suffixed(prefixed(p, a), s))
+): Parser<T> => suffixed(prefixed(p, a), s)
 
 export const satifyChar =
   (f: (c: char) => boolean): Parser<char> =>
@@ -92,9 +87,9 @@ export const satifyChar =
 
 export const digit = satifyChar(c => /^[0-9]$/g.test(c))
 
-export const integer: Parser<number> = flow(
+export const digits: Parser<string> = flow(
   many1(digit),
-  map(mapFst(ds => parseInt(ds.join(''), 10))),
+  map(mapFst(ds => ds.join(''))),
 )
 
 export const or = <T>(parsers: Parser<T>[]): Parser<T> => {
@@ -111,13 +106,6 @@ export const or = <T>(parsers: Parser<T>[]): Parser<T> => {
 
 export const matchChar = (ch: char): Parser<char> => satifyChar(eq(ch))
 
-export const space = matchChar(' ')
-export const newline = matchChar('\n')
-export const tab = matchChar('\t')
-
-export const whitespace = or([space, newline, tab])
-export const whitespaces0 = many0(whitespace)
-
 export const matchString =
   (s: string): Parser<string> =>
   (input: string) =>
@@ -126,6 +114,9 @@ export const matchString =
       : left([`Expected ${s} but got ${input.slice(0, 1)}`, input])
 
 export const oneOf = (xs: string[]): Parser<string> => or(xs.map(matchString))
+
+export const whitespace = oneOf([' ', '\n', '\t'])
+export const whitespaces0 = many0(whitespace)
 
 export const symbol = (s: string): Parser<string> =>
   delimited(whitespaces0, matchString(s), whitespaces0)

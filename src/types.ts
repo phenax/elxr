@@ -3,6 +3,13 @@ import { constructors, Union } from "./utils"
 
 type _ = never
 
+export type Literal = Union<{
+  String: string,
+  Number: number,
+  Boolean: boolean,
+}>
+export const Literal = constructors<Literal>()
+
 export type Expr = Union<{
   Start: _,
   End: _,
@@ -19,8 +26,8 @@ export type Expr = Union<{
   Falsey: _,
   Group: { exprs: Expr[] },
   PropertyMatch: { name: string, exprs: Expr[] },
+  Literal: Literal,
 }>
-
 export const Expr = constructors<Expr>()
 
 export type ListExpr = [

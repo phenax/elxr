@@ -1,31 +1,30 @@
 import { left, right } from 'fp-ts/Either'
 import {
-  integer,
+  digits,
   whitespace,
   whitespaces0,
   delimited,
-  many1,
-  satifyChar,
 } from '../src/parser/utils'
-import { parser, propertyName } from '../src/parser'
+import { parser } from '../src/parser'
 import { none, some } from 'fp-ts/Option'
-import { Expr } from '../src/types'
+import { Expr, Literal } from '../src/types'
+import { jlog } from '../src/utils'
 
-const plog = (x: any) => console.log(JSON.stringify(x, null, 2))
+const wrap = (l: any) => right([[none, l, none], ''])
 
-describe('Foobar', () => {
+describe('Parser', () => {
   it('should do shit', () => {
-    expect(integer('12901')).toEqual(right([12901, '']))
-    expect(integer('12901asas')).toEqual(right([12901, 'asas']))
+    expect(digits('12901')).toEqual(right(['12901', '']))
+    expect(digits('12901asas')).toEqual(right(['12901', 'asas']))
     expect(whitespace(' ')).toEqual(right([' ', '']))
     expect(whitespace('\n')).toEqual(right(['\n', '']))
     expect(whitespace('a')).toEqual(left(['unable to match', 'a']))
 
-    expect(delimited(whitespaces0, integer, whitespaces0)(' 20 ')).toEqual(
-      right([20, '']),
+    expect(delimited(whitespaces0, digits, whitespaces0)(' 20 ')).toEqual(
+      right(['20', '']),
     )
-    expect(delimited(whitespaces0, integer, whitespaces0)(' 2 0 ')).toEqual(
-      right([2, '0 ']),
+    expect(delimited(whitespaces0, digits, whitespaces0)(' 2 0 ')).toEqual(
+      right(['2', '0 ']),
     )
   })
 
@@ -87,20 +86,48 @@ describe('Foobar', () => {
 
   it('object proprtyu', () => {
     expect(parser(/ [name \s\T] [age \n] /.source)).toEqual(
-      right([
-        [
-          none,
-          [
-            Expr.PropertyMatch({
-              name: 'name',
-              exprs: [Expr.AnyString(), Expr.Truthy()],
-            }),
-            Expr.PropertyMatch({ name: 'age', exprs: [Expr.AnyNumber()] }),
-          ],
-          none,
-        ],
-        '',
+      wrap([
+        Expr.PropertyMatch({
+          name: 'name',
+          exprs: [Expr.AnyString(), Expr.Truthy()],
+        }),
+        Expr.PropertyMatch({ name: 'age', exprs: [Expr.AnyNumber()] }),
       ]),
+    )
+  })
+
+  it('literals', () => {
+    // unsigned numbers
+    expect(parser(/ 0.105 /.source)).toEqual(
+      wrap([Expr.Literal(Literal.Number(0.105))]),
+    )
+    expect(parser(/ 9 /.source)).toEqual(
+      wrap([Expr.Literal(Literal.Number(9))]),
+    )
+    expect(parser(/ 23 /.source)).toEqual(
+      wrap([Expr.Literal(Literal.Number(23))]),
+    )
+
+    // signed numbers
+    expect(parser(/ +23.025 /.source)).toEqual(
+      wrap([Expr.Literal(Literal.Number(23.025))]),
+    )
+    expect(parser(/ -23.025 /.source)).toEqual(
+      wrap([Expr.Literal(Literal.Number(-23.025))]),
+    )
+    expect(parser(/ +23 /.source)).toEqual(
+      wrap([Expr.Literal(Literal.Number(23))]),
+    )
+    expect(parser(/ -23 /.source)).toEqual(
+      wrap([Expr.Literal(Literal.Number(-23))]),
+    )
+
+    // boolean
+    expect(parser(/ true /.source)).toEqual(
+      wrap([Expr.Literal(Literal.Boolean(true))]),
+    )
+    expect(parser(/ false /.source)).toEqual(
+      wrap([Expr.Literal(Literal.Boolean(false))]),
     )
   })
 })

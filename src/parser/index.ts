@@ -2,9 +2,11 @@ import { flow, pipe } from 'fp-ts/function'
 import { chain, left, orElse, right } from 'fp-ts/lib/Either'
 import {
   delimited,
+  digits,
   many0,
   many1,
   mapTo,
+  matchChar,
   oneOf,
   optional,
   or,
@@ -18,7 +20,9 @@ import {
   tuple3,
   whitespaces0,
 } from './utils'
-import { Expr, ListExpr } from '../types'
+import { Expr, ListExpr, Literal } from '../types'
+import {getOrElse, map} from 'fp-ts/lib/Option'
+import {snd} from 'fp-ts/lib/Tuple'
 
 const start = mapTo(symbol('^'), _ => Expr.Start())
 const end = mapTo(symbol('$'), _ => Expr.End())
@@ -76,6 +80,37 @@ const objectProperty = (input: string) =>
     ),
   )
 
+const unsignedNum: Parser<number> = mapTo(pair(digits, optional(pair(matchChar('.'), digits))), ([int, decimal]) =>
+  pipe(
+    decimal,
+    map(snd),
+    getOrElse(() => '0'),
+    n => parseFloat(`${int}.${n}`),
+  )
+)
+
+const numberLiteral: Parser<Literal> = mapTo(
+  pair(optional(oneOf(['+', '-'])), unsignedNum),
+  ([signO, n]) =>
+    pipe(
+      signO,
+      getOrElse(() => '+'),
+      sign => (sign === '-' ? -1 : 1) * n,
+      Literal.Number,
+    )
+  ,
+)
+
+const booleanLiteral: Parser<Literal> = mapTo(oneOf(['true', 'false']), b =>
+  Literal.Boolean(b === 'true' ? true : false),
+)
+
+const literalP: Parser<Literal> = delimited(
+  whitespaces0,
+  or([booleanLiteral, numberLiteral]),
+  whitespaces0,
+)
+
 const expressionP: Parser<Expr> = (input: string) =>
   pipe(
     input,
@@ -91,6 +126,7 @@ const expressionP: Parser<Expr> = (input: string) =>
       anyBool,
       truthy,
       falsey,
+      mapTo(literalP, Expr.Literal),
     ]),
     wrapQuantifiers,
     wrapAlt,
