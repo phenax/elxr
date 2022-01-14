@@ -23,6 +23,7 @@ Whitespaces are ignore (except within literals)
 * `a,b` => match `a` followed by `b` (next item)
 * `[name \s\T]` => match property of object (example matches items with property `name` as non-empty string)
 * `> n` | `>= n` | `< n` | `<= n` => Comparison with literal number [TODO]
+* `/pat/` => Test string values against regex [TODO]
 
 
 

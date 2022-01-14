@@ -1,7 +1,12 @@
+import {jlog} from '../src/utils'
 import { matchAll } from '../src'
 
 describe('Basic tests', () => {
   describe('matchAll', () => {
+    it('should do shit', () => {
+      // jlog(matchAll(/\s+/, [1, '2', '', '3', 5, '6']))
+    })
+
     it('should filter shit', () => {
       expect(matchAll(/\s/, [1, '2', 3, '4']).groups).toEqual([
         { value: '2', index: 1 },
@@ -70,7 +75,7 @@ describe('Basic tests', () => {
       ])
     })
 
-    it('should match object property matchers', () => {
+    it('should match object property matchers multi', () => {
       expect(
         matchAll(/([age \n][age \T])+/, [
           {},
@@ -80,6 +85,21 @@ describe('Basic tests', () => {
           '',
         ]).groups,
       ).toEqual([{ value: [{ age: 1 }, { age: 2 }], index: 1 }])
+
+      expect(
+        matchAll(/([age \n][age \T])*/, [
+          {},
+          { age: 1 },
+          { age: 2 },
+          { age: 0 },
+          '',
+        ]).groups,
+      ).toEqual([
+        { value: [], index: 0 },
+        { value: [{ age: 1 }, { age: 2 }], index: 1 },
+        { value: [], index: 3 },
+        { value: [], index: 4 },
+      ])
 
       expect(
         matchAll(/ [num \n\T]+ /, [

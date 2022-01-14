@@ -20,6 +20,8 @@ const group = <T>(value: T, index: number): MatchGroupIndexed<T> => ({
 
 type index = number
 
+const indexed = <T>(ls: T[]): Array<[number, T]> => ls.map((x, i) => [i, x])
+
 const accumulateSkip = () => {
   const skipIndexes = [] as index[]
   return {
@@ -100,13 +102,22 @@ const checkExpr = <T>(
         ),
 
       OneOrMore: ({ expr }) => {
+        const { localSkip, getSkips } = accumulateSkip()
+        const result = checkExpr(Expr.ZeroOrMore({ expr }), item, list, index, localSkip)
+        return pipe(
+          result[0].value.length > 0 ? result : [],
+          skip(getSkips().reduce((a, b) => a + b, 0)),
+        )
+      },
+
+      ZeroOrMore: ({ expr }) => {
         // TODO: Nested quantified expressions?
         const matches = pipe(
           list,
           takeLeftWhile(a => checkExpr(expr, a, list, index).length > 0),
         )
         return pipe(
-          matches.length > 0 ? [group(matches, index)] : [],
+          [group(matches, index)],
           skip(matches.length || 1),
         )
       },
@@ -115,8 +126,6 @@ const checkExpr = <T>(
         const { getSkips, localSkip } = accumulateSkip()
         const getGroups = () => {
           if (exprs.length > list.length) return []
-          const indexed = <T>(ls: T[]): Array<[number, T]> =>
-            ls.map((x, i) => [i, x])
           const result = pipe(
             zipWith(exprs, indexed(list), (expr, [i, val]) =>
               checkExpr(expr, val, list.slice(i), index + i, localSkip),
