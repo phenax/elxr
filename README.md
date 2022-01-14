@@ -8,7 +8,7 @@ Regular expression-like syntax for list operations. Toy project experimenting wi
 
 
 ### Syntax
-Whitespaces are ignore (except within literals)
+Whitespaces are ignored (except within literals)
 
 * `\s` => Any **string**
 * `\n` => Any **number**
