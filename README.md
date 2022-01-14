@@ -1,6 +1,6 @@
 # ListExp [ WIP ]
 
-Regular expression-like syntax for list operations. Nobody asked for this so here it is.
+Regular expression-like syntax for list operations. Toy project experimenting with generalizing regex-like operations to a list.
 
 [![forthebadge](https://forthebadge.com/images/badges/you-didnt-ask-for-this.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/kinda-sfw.svg)](https://forthebadge.com)
@@ -18,6 +18,7 @@ Whitespaces are ignore (except within literals)
 * `a|b` => match `a` **or** `b`
 * `a*` => Zero or more consecutive instances of pattern `a` in the list
 * `a+` => One or more consecutive instances of pattern `a` in the list
+* `a{2, 5}` => Min-Max quantifiers (example matches a more than 2 times but less than 5) [TODO]
 * `(\s\T)` => Group (example matches any non-empty string)
 * `^a$` => `^` indicates start of list, and `$` indicates end of list [TODO]
 * `a,b` => match `a` followed by `b` (next item)
@@ -25,6 +26,17 @@ Whitespaces are ignore (except within literals)
 * `> n` | `>= n` | `< n` | `<= n` => Comparison with literal number [TODO]
 * `/pat/` => Test string values against regex [TODO]
 
+
+### TODO
+  - [X] `matchAll` function
+  - [ ] `replaceAll` function
+  - [ ] `match` function
+  - [ ] Named capture groups
+  - [ ] Non-capturing groups
+  - [ ] `{min, max}` quantifiers
+  - [ ] Regular expressions for string items
+  - [ ] Nested list evaluation
+  - [ ] Number comarison
 
 
 ### Examples
