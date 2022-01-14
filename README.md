@@ -1,19 +1,10 @@
 # ListExp [ WIP ]
 
-Regular expression-like syntax for list operations. You didn't ask for this so here it is.
+Regular expression-like syntax for list operations. Nobody asked for this so here it is.
 
-Example -
-
-```js
-filter(/ \T (\s | \n) /, [ null, 0, '2', 3, true ])
-// > [ '2', 3 ]
-
-filter(/ \T[name \s\T] /, [ null, 0, { name: '' }, { name: 'phenax' } ])
-// > [ { name: 'phenax' } ]
-
-matchAll(/ [num \n\T]+ /, [ null, { num: 1 }, { num: 2 }, {}, { num: 0 }, { num: 3 } ])
-// > [ { value: [{ num: 1 }, { num: 2 }], index: 1 }, { value: [{ num: 3 }], index: 5 } ]
-```
+[![forthebadge](https://forthebadge.com/images/badges/you-didnt-ask-for-this.svg)](https://forthebadge.com)
+[![forthebadge](https://forthebadge.com/images/badges/kinda-sfw.svg)](https://forthebadge.com)
+[![forthebadge](https://forthebadge.com/images/badges/0-percent-optimized.svg)](https://forthebadge.com)
 
 
 ### Syntax
@@ -24,12 +15,60 @@ Whitespaces are ignore (except within literals)
 * `\b` => Any boolean
 * `\T` => Any truthy value
 * `\F` => Any falsey value
-* `a|b` => match `a` **or** `b` [TODO]
+* `a|b` => match `a` **or** `b`
 * `a*` => Zero or more consecutive instances of pattern `a` in the list
 * `a+` => One or more consecutive instances of pattern `a` in the list
 * `(\s\T)` => Group (example matches any non-empty string)
 * `^a$` => `^` indicates start of list, and `$` indicates end of list [TODO]
-* `a,b` => match `a` followed by `b` (next item) [TODO]
+* `a,b` => match `a` followed by `b` (next item)
 * `[name \s\T]` => match property of object (example matches items with property `name` as non-empty string)
-* `> n` | `>= n` | `< n` | `<= n` => Comparison [TODO]
+* `> n` | `>= n` | `< n` | `<= n` => Comparison with literal number [TODO]
+
+
+
+### Examples
+
+```js
+// | Match for any number or any non-empty string or any object with `prop` is true
+matchAll(/ \n | \s\T | [prop true] /, [null, 23, 'wow', '', { prop: true }, { prop: false } ]
+// > {
+//   groups: [
+//     { index: 1, value: 23 }, // \n
+//     { index: 2, value: 'wow' }, // \s\T
+//     { index: 4, value: { prop: true } }, // [prop true]
+//   ]
+// }
+```
+
+```js
+// | Match for property `seperator` true, followed by one or more list of id's that are non-empty strings
+matchAll(/ [seperator true], [id \s\T]+ /, [
+  { seperator: true },
+  { id: '1' },
+  { id: '2' },
+  { id: '3' },
+  { seperator: true },
+  { id: '4' },
+  { id: '5' },
+  { id: '6' },
+])
+// > {
+//   groups: [
+//     {
+//       index: 0,
+//       value: [
+//         [{ value: { seperator: true }, index: 0 }],
+//         [{ value: [{ id: '1' }, { id: '2' }, { id: '3' }], index: 1 }],
+//       ],
+//     },
+//     {
+//       index: 4,
+//       value: [
+//         [{ value: { seperator: true }, index: 4 }],
+//         [{ value: [{ id: '4' }, { id: '5' }, { id: '6' }], index: 5 }],
+//       ],
+//     },
+//   ]
+// }
+```
 
