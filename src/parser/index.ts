@@ -22,8 +22,8 @@ import {
   whitespaces0,
 } from './utils'
 import { Expr, ListExpr, Literal } from '../types'
-import {getOrElse, map} from 'fp-ts/lib/Option'
-import {mapFst, snd} from 'fp-ts/lib/Tuple'
+import { getOrElse, map } from 'fp-ts/lib/Option'
+import { mapFst, snd } from 'fp-ts/lib/Tuple'
 
 const start = mapTo(symbol('^'), _ => Expr.Start())
 const end = mapTo(symbol('$'), _ => Expr.End())
@@ -65,17 +65,20 @@ const objectProperty = (input: string) =>
         pair(propertyName, many0(expressionP)),
         symbol(']'),
       ),
-      ([name, exprs]) => Expr.PropertyMatch({ name, expr: exprsToGroup(exprs) }),
+      ([name, exprs]) =>
+        Expr.PropertyMatch({ name, expr: exprsToGroup(exprs) }),
     ),
   )
 
-const unsignedNum: Parser<number> = mapTo(pair(digits, optional(pair(matchChar('.'), digits))), ([int, decimal]) =>
-  pipe(
-    decimal,
-    map(snd),
-    getOrElse(() => '0'),
-    n => parseFloat(`${int}.${n}`),
-  )
+const unsignedNum: Parser<number> = mapTo(
+  pair(digits, optional(pair(matchChar('.'), digits))),
+  ([int, decimal]) =>
+    pipe(
+      decimal,
+      map(snd),
+      getOrElse(() => '0'),
+      n => parseFloat(`${int}.${n}`),
+    ),
 )
 
 const numberLiteral: Parser<Literal> = mapTo(
@@ -86,8 +89,7 @@ const numberLiteral: Parser<Literal> = mapTo(
       getOrElse(() => '+'),
       sign => (sign === '-' ? -1 : 1) * n,
       Literal.Number,
-    )
-  ,
+    ),
 )
 
 const booleanLiteral: Parser<Literal> = mapTo(oneOf(['true', 'false']), b =>
@@ -100,25 +102,38 @@ const literalP: Parser<Literal> = delimited(
   whitespaces0,
 )
 
-const infixOp = (op: Parser<any>): Parser<Expr[]> => (input: string) => pipe(
-  input,
-  sepBy1(op, groupP),
-  chain(([exprs, nextInput]) => exprs.length === 1
-    ? left(['Infix operator parsing error', input])
-    : right([exprs, nextInput])),
+const infixOp =
+  (op: Parser<any>): Parser<Expr[]> =>
+  (input: string) =>
+    pipe(
+      input,
+      sepBy1(op, groupP),
+      chain(([exprs, nextInput]) =>
+        exprs.length === 1
+          ? left(['Infix operator parsing error', input])
+          : right([exprs, nextInput]),
+      ),
+    )
+
+const altP: Parser<Expr> = mapTo(infixOp(symbol('|')), exprs =>
+  Expr.Or({ exprs }),
 )
 
-const altP: Parser<Expr> = mapTo(infixOp(symbol('|')), exprs => Expr.Or({ exprs }))
+const sequenceP: Parser<Expr> = mapTo(infixOp(symbol(',')), exprs =>
+  Expr.Sequence({ exprs }),
+)
 
-const sequenceP: Parser<Expr> = mapTo(infixOp(symbol(',')), exprs => Expr.Sequence({ exprs }))
-
-const expressionP: Parser<Expr> = (input: string) => or([ altP, sequenceP, groupP ])(input)
+const expressionP: Parser<Expr> = (input: string) =>
+  or([altP, sequenceP, groupP])(input)
 
 const atomP: Parser<Expr> = (input: string) =>
   pipe(
     input,
     or([
-      mapTo(delimited(symbol('('), many1(expressionP), symbol(')')), exprsToGroup),
+      mapTo(
+        delimited(symbol('('), many1(expressionP), symbol(')')),
+        exprsToGroup,
+      ),
       objectProperty,
       anyItem,
       anyString,
@@ -131,7 +146,8 @@ const atomP: Parser<Expr> = (input: string) =>
     wrapQuantifiers,
   )
 
-const exprsToGroup = (exprs: Expr[]) => exprs.length === 1 ? exprs[0] : Expr.Group({ exprs })
+const exprsToGroup = (exprs: Expr[]) =>
+  exprs.length === 1 ? exprs[0] : Expr.Group({ exprs })
 const groupP: Parser<Expr> = mapTo(many1(atomP), exprsToGroup)
 
 export const parser: Parser<ListExpr> = tuple3(

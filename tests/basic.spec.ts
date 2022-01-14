@@ -1,24 +1,30 @@
-import { jlog } from '../src/utils'
-import { filter, matchAll } from '../src'
+import { matchAll } from '../src'
 
 describe('Basic tests', () => {
-  it('should filter shit', () => {
-    expect(filter(/\s/, [1, '2', 3, '4'])).toEqual(['2', '4'])
-    expect(filter(/\n/, [1, '2', 3, '4'])).toEqual([1, 3])
-    expect(filter(/\T/, [1, 0, '4', ''])).toEqual([1, '4'])
-    expect(filter(/\F/, [1, 0, '4', ''])).toEqual([0, ''])
-    expect(filter(/\F\T/, [1, 0, '4', ''])).toEqual([])
-    expect(filter(/\s\T/, [1, 0, '4', ''])).toEqual(['4'])
-  })
-
-  it('should do it', () => {
-    // jlog(matchAll(/[age \n]+/, [ {}, { age: 1 }, { age: 2 }, { age: 0 }, '' ]))
-    // jlog(matchAll(/[age \n]+/, [ {}, { age: 1 }, '' ]))
-    // jlog(matchAll(/([age \n])+/, [ {}, { age: 1 }, { age: 2 }, { age: 0 }, '' ]))
-    // jlog(matchAll(/\n+/, [ '', 1, 2, 0, '6', 5, '' ]))
-  })
-
   describe('matchAll', () => {
+    it('should filter shit', () => {
+      expect(matchAll(/\s/, [1, '2', 3, '4']).groups).toEqual([
+        { value: '2', index: 1 },
+        { value: '4', index: 3 },
+      ])
+      expect(matchAll(/\n/, [1, '2', 3, '4']).groups).toEqual([
+        { value: 1, index: 0 },
+        { value: 3, index: 2 },
+      ])
+      expect(matchAll(/\T/, [1, 0, '4', '']).groups).toEqual([
+        { value: 1, index: 0 },
+        { value: '4', index: 2 },
+      ])
+      expect(matchAll(/\F/, [1, 0, '4', '']).groups).toEqual([
+        { value: 0, index: 1 },
+        { value: '', index: 3 },
+      ])
+      expect(matchAll(/\F\T/, [1, 0, '4', '']).groups).toEqual([])
+      expect(matchAll(/\s\T/, [1, 0, '4', '']).groups).toEqual([
+        { value: '4', index: 2 },
+      ])
+    })
+
     it('should match literals', () => {
       expect(
         matchAll(/ -2.05 /, [2, NaN, -2.05, '-2.05', -2.05, 2.05]).groups,

@@ -137,7 +137,10 @@ const checkExpr = <T>(
         }
 
         const groups = getGroups()
-        const skips = Math.max(1, getSkips().reduce((a, b) => a + b, -1))
+        const skips = Math.max(
+          1,
+          getSkips().reduce((a, b) => a + b, -1),
+        )
         return pipe(groups, skip(skips))
       },
 
@@ -168,36 +171,4 @@ export const matchAll = <T>(
   return {
     groups: check(0, list, expr),
   }
-}
-
-export const find = <T>([startO, expr, endO]: ListExpr, list: T[]): any => {
-  const check =
-    (expr: Expr) =>
-    <T>(x: T, i: number, ls: T[]): boolean => {
-      return pipe(
-        expr,
-        match<boolean, Expr>({
-          AnyItem: _ => true,
-          AnyNumber: _ => typeof x === 'number',
-          AnyString: _ => typeof x === 'string',
-          AnyBool: _ => typeof x === 'boolean',
-          Truthy: _ => !!x,
-          Falsey: _ => !x,
-          Group: ({ exprs }) => exprs.every(e => check(e)(x, i, ls)),
-          PropertyMatch: ({ name, expr }) =>
-            name in x && check(expr)(x[name], i, ls),
-          OneOrMore: ({ expr }) => {
-            // TODO: Nested quantified expression
-            const x = pipe(
-              list.slice(i),
-              takeLeftWhile(x => check(expr)(x, i, list)),
-            )
-            return true
-          },
-          _: _ => false,
-        }),
-      )
-    }
-
-  return list.filter((x, i, ls) => check(expr)(x, i, ls))
 }
