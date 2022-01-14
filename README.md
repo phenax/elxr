@@ -10,21 +10,24 @@ Regular expression-like syntax for list operations. Toy project experimenting wi
 ### Syntax
 Whitespaces are ignore (except within literals)
 
-* `\s` => Any string
-* `\n` => Any number
-* `\b` => Any boolean
-* `\T` => Any truthy value
-* `\F` => Any falsey value
+* `\s` => Any **string**
+* `\n` => Any **number**
+* `\b` => Any **boolean**
+* `\T` => Any **truthy** value
+* `\F` => Any **falsey** value
 * `a|b` => match `a` **or** `b`
-* `a*` => Zero or more consecutive instances of pattern `a` in the list
-* `a+` => One or more consecutive instances of pattern `a` in the list
-* `a{2, 5}` => Min-Max quantifiers (example matches a more than 2 times but less than 5) [TODO]
-* `(\s\T)` => Group (example matches any non-empty string)
-* `^a$` => `^` indicates start of list, and `$` indicates end of list [TODO]
-* `a,b` => match `a` followed by `b` (next item)
-* `[name \s\T]` => match property of object (example matches items with property `name` as non-empty string)
-* `> n` | `>= n` | `< n` | `<= n` => Comparison with literal number [TODO]
-* `/pat/` => Test string values against regex [TODO]
+* `a*` => **Zero or more** consecutive instances of pattern `a` in the list
+* `a+` => **One or more** consecutive instances of pattern `a` in the list
+* `a{2, 5}` => **Min-Max** quantifiers (example matches `a` more than 2 times but less than 5) [TODO]
+* `(\s\T)` => **Group** (example matches any non-empty string)
+* `^a$` => `^` indicates **start** of list, and `$` indicates **end** of list [TODO]
+* `a,b` => match `a` on current item followed by `b` on the next item (**sequence**)
+* `[name \s\T]` => match **property** of object (example matches items with property `name` as non-empty string)
+* `> n` | `>= n` | `< n` | `<= n` => **Comparison** with literal number [TODO]
+* `/pat/` => Test string values against **regex** [TODO]
+* `"foobar"` => String literal (example matches the string `foobar`)
+* `-2.05` => Number literal (example matches the number `-2.05`)
+* `true` => Boolean literal (example matches the value `true`)
 
 
 ### TODO
