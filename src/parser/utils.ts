@@ -3,7 +3,7 @@ import * as Either from 'fp-ts/Either'
 import * as Option from 'fp-ts/Option'
 import { fst, mapFst, mapSnd, snd } from 'fp-ts/Tuple'
 import { eq } from '../utils'
-import { prepend } from 'fp-ts/Array'
+import { flatten, prepend } from 'fp-ts/Array'
 
 export type char = string
 
@@ -28,6 +28,19 @@ export const sepBy1 = <T>(sep: Parser<any>, parser: Parser<T>): Parser<T[]> =>
       ),
     ),
   )
+
+export const not = (parser: Parser<any>): Parser<null> => (input: string) =>
+  pipe(
+    input,
+    parser,
+    Either.fold(
+      ([_left, inp]) => Either.right([null, inp]),
+      ([_right, inp]) => Either.left(['`not` parser failed. Match found', inp])
+    ),
+  )
+
+export const manyTill = <T>(parser: Parser<T>, end: Parser<any>): Parser<T[]> =>
+  mapTo(pair(many0(suffixed(parser, not(end))), parser), ([xs, l]) => xs.concat([l]))
 
 export const many0 = <T>(parser: Parser<T>): Parser<Array<T>> =>
   flow(

@@ -4,10 +4,17 @@ import {
   whitespace,
   whitespaces0,
   delimited,
+  not,
+  symbol,
+  satifyChar,
+  matchChar,
+  manyTill,
+  pair,
 } from '../src/parser/utils'
 import { parser } from '../src/parser'
 import { none, some } from 'fp-ts/Option'
 import { Expr, Literal } from '../src/types'
+import {jlog} from '../src/utils'
 
 const wrap = (e: Expr) => right([[none, e, none], ''])
 const grouped = (l: Expr[]) => wrap(Expr.Group({ exprs: l }))
@@ -16,6 +23,8 @@ const groupedAlt = (l: Expr[]) => wrap(Expr.Or({ exprs: l }))
 describe('Parser', () => {
   it('should do shit', () => {
     // jlog(parser(/ -2.05|\n2|true|\s|\T /.source))
+    //const p = pair(symbol('a'), symbol('b'))
+    //jlog(manyTill(p, matchChar('!'))('ab ab ab ab! nice nice'))
   })
 
   it('should do shit', () => {
