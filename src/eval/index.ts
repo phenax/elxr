@@ -10,7 +10,7 @@ import {
   some,
 } from 'fp-ts/lib/Option'
 import { Expr, ListExpr, Literal } from '../types'
-import { match } from '../utils'
+import { jlog, match } from '../utils'
 
 export interface MatchGroupIndexed<T = any> {
   value: T
@@ -27,6 +27,16 @@ const group = <T>(value: T, index: number): MatchGroupIndexed<T> => ({
 })
 
 type index = number
+
+const accumulateSkip = () => {
+  const skipIndexes = [] as index[]
+  return {
+    localSkip:
+      (i: index) =>
+      <T>(x: T): T => (skipIndexes.push(i), x),
+    getSkips: () => skipIndexes,
+  }
+}
 
 const checkExpr = <T>(
   expr: Expr,
@@ -58,8 +68,7 @@ const checkExpr = <T>(
 
       Group: ({ exprs }) => {
         const [head, ...tail] = exprs
-        const skipIndexes = [] as index[]
-        const localSkip = (i: index) => (x: any) => (skipIndexes.push(i), x)
+        const { getSkips, localSkip } = accumulateSkip()
         const matches = tail.reduce(
           (acc, exp) =>
             pipe(
@@ -78,16 +87,15 @@ const checkExpr = <T>(
         return pipe(
           matches,
           getOrElseW(() => []),
-          skip(Math.max(...skipIndexes) || 1),
+          skip(Math.max(...getSkips()) || 1),
         )
       },
 
       Or: ({ exprs }) => {
-        const match = exprs.find(expr => checkExpr(expr, item, list, index).length > 0)
-        return pipe(
-          match ? [group(item, index)] : [],
-          skip(1),
+        const match = exprs.find(
+          expr => checkExpr(expr, item, list, index).length > 0,
         )
+        return pipe(match ? [group(item, index)] : [], skip(1))
       },
 
       PropertyMatch: ({ name, expr }) =>
@@ -112,26 +120,30 @@ const checkExpr = <T>(
       },
 
       Sequence: ({ exprs }) => {
+        const { getSkips, localSkip } = accumulateSkip()
         const getGroups = () => {
           if (exprs.length > list.length) return []
-
-          const indexed = <T>(ls: T[]): Array<[number, T]> => ls.map((x, i) => [i, x])
+          const indexed = <T>(ls: T[]): Array<[number, T]> =>
+            ls.map((x, i) => [i, x])
           const result = pipe(
-            zipWith(exprs, indexed(list), (expr, [i, val]) => checkExpr(expr, val, list, index + i)),
+            zipWith(exprs, indexed(list), (expr, [i, val]) =>
+              checkExpr(expr, val, list.slice(i), index + i, localSkip),
+            ),
             filter(matches => !!matches.length),
           )
           if (result.length !== exprs.length) return []
 
           return [group(result, index)]
-        };
+        }
 
-        return pipe(
-          getGroups(),
-          skip(exprs.length || 1),
-        )
+        const groups = getGroups()
+        const skips = Math.max(1, getSkips().reduce((a, b) => a + b, -1))
+        return pipe(groups, skip(skips))
       },
 
-      _: _ => { throw new Error(`TODO: ${expr.tag} not implemented for match`) },
+      _: _ => {
+        throw new Error(`TODO: ${expr.tag} not implemented for match`)
+      },
     }),
   )
 }

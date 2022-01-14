@@ -123,11 +123,54 @@ describe('Basic tests', () => {
 
     it('should match sequence of matchers', () => {
       expect(
+        matchAll(/ [seperator true], [id \s\T]+ /, [
+          // FIXME: Sequence doesn't work with Quantifiers
+          { seperator: true },
+          { id: '1' },
+          { id: '2' },
+          { id: '3' },
+          { seperator: true },
+          { id: '4' },
+          { id: '5' },
+          { id: '6' },
+        ]).groups,
+      ).toEqual([
+        {
+          index: 0,
+          value: [
+            [{ value: { seperator: true }, index: 0 }],
+            [{ value: [{ id: '1' }, { id: '2' }, { id: '3' }], index: 1 }],
+          ],
+        },
+        {
+          index: 4,
+          value: [
+            [{ value: { seperator: true }, index: 4 }],
+            [{ value: [{ id: '4' }, { id: '5' }, { id: '6' }], index: 5 }],
+          ],
+        },
+      ])
+
+      expect(
         matchAll(/ true, \n, \s /, [true, 5, 'five', 1, 2, 3, true, 7, 'seven'])
           .groups,
       ).toEqual([
-        { value: [ [{ value: true, index: 0 }], [{ value: 5, index: 1 }], [{ value: 'five', index: 2 }] ], index: 0 },
-        { value: [ [{ value: true, index: 6 }], [{ value: 7, index: 7 }], [{ value: 'seven', index: 8 }] ], index: 6 },
+        {
+          value: [
+            [{ value: true, index: 0 }],
+            [{ value: 5, index: 1 }],
+            [{ value: 'five', index: 2 }],
+          ],
+          index: 0,
+        },
+        {
+          value: [
+            [{ value: true, index: 6 }],
+            [{ value: 7, index: 7 }],
+            [{ value: 'seven', index: 8 }],
+          ],
+          index: 6,
+        },
       ])
     })
   })
