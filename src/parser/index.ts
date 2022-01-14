@@ -81,12 +81,11 @@ const unsignedNum: Parser<number> = mapTo(
 )
 
 const numberLiteral: Parser<Literal> = mapTo(
-  pair(optional(oneOf(['+', '-'])), unsignedNum),
+  pair(optional(matchChar('-')), unsignedNum),
   ([signO, n]) =>
     pipe(
       signO,
-      Option.getOrElse(() => '+'),
-      sign => (sign === '-' ? -1 : 1) * n,
+      negative => (Option.isSome(negative) ? -1 : 1) * n,
       Literal.Number,
     ),
 )

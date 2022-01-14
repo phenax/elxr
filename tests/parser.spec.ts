@@ -117,13 +117,13 @@ describe('Parser', () => {
     )
 
     // signed numbers
-    expect(parser(/ +23.025 /.source)).toEqual(
+    expect(parser(/ 23.025 /.source)).toEqual(
       wrap(Expr.Literal(Literal.Number(23.025))),
     )
     expect(parser(/ -23.025 /.source)).toEqual(
       wrap(Expr.Literal(Literal.Number(-23.025))),
     )
-    expect(parser(/ +23 /.source)).toEqual(
+    expect(parser(/ 23 /.source)).toEqual(
       wrap(Expr.Literal(Literal.Number(23))),
     )
     expect(parser(/ -23 /.source)).toEqual(
