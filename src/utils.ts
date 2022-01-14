@@ -16,7 +16,7 @@ type Tag<N, V> = { tag: N; value: V }
 export type Union<T> = { [N in keyof T]: Tag<N, T[N]> }[keyof T]
 
 export const constructors = <T extends Tag<string, any>>(): {
-  [N in T['tag']]: TagValue<T, N> extends null|never
+  [N in T['tag']]: TagValue<T, N> extends null | never
     ? (value?: null | never) => T
     : (value: TagValue<T, N>) => T
 } =>

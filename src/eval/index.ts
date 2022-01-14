@@ -1,16 +1,8 @@
 import { identity, pipe } from 'fp-ts/function'
-import { filter, takeLeftWhile, zip, zipWith } from 'fp-ts/lib/Array'
-import {
-  chain,
-  getOrElseW,
-  isSome,
-  map,
-  none,
-  Option,
-  some,
-} from 'fp-ts/lib/Option'
-import { Expr, ListExpr, Literal } from '../types'
-import { jlog, match } from '../utils'
+import { filter, takeLeftWhile, zip, zipWith } from 'fp-ts/Array'
+import * as Option from 'fp-ts/Option'
+import { Expr, ListExpr } from '../types'
+import { match } from '../utils'
 
 export interface MatchGroupIndexed<T = any> {
   value: T
@@ -73,20 +65,20 @@ const checkExpr = <T>(
           (acc, exp) =>
             pipe(
               acc,
-              chain(ac =>
+              Option.chain(ac =>
                 pipe(
                   checkExpr(exp, item, list, index, localSkip),
                   zip(ac),
                   z => z.map(([res, _cur]) => res),
-                  z => (z.length === 0 ? none : some(z)),
+                  z => (z.length === 0 ? Option.none : Option.some(z)),
                 ),
               ),
             ),
-          some(checkExpr(head, item, list, index, localSkip)),
+          Option.some(checkExpr(head, item, list, index, localSkip)),
         )
         return pipe(
           matches,
-          getOrElseW(() => []),
+          Option.getOrElseW(() => []),
           skip(Math.max(...getSkips()) || 1),
         )
       },
@@ -103,12 +95,12 @@ const checkExpr = <T>(
           Object.prototype.hasOwnProperty.call(item ?? {}, name)
             ? checkExpr(expr, item[name], list, index)
             : [],
-          res => (res.length > 0 ? [group(item, index)] : []), // FIXME: doesn't allow nested matching
+          res => (res.length > 0 ? [group(item, index)] : []), // TODO: doesn't allow nested matching
           skip(1),
         ),
 
       OneOrMore: ({ expr }) => {
-        // TODO: Nested quantified expression
+        // TODO: Nested quantified expressions?
         const matches = pipe(
           list,
           takeLeftWhile(a => checkExpr(expr, a, list, index).length > 0),

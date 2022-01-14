@@ -10,7 +10,7 @@
   "scripts": {
     "tsc": "tsc --emitDeclarationOnly --outDir lib",
     "test": "jest",
-    "format": "prettier --write ./src/**/*.ts",
+    "format": "prettier --write ./src/**/*.ts ./tests/**/*.ts",
     "build": "rimraf lib && node ./esbuild.js && npm run tsc"
   },
   "devDependencies": {

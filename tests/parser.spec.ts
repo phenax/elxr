@@ -4,14 +4,10 @@ import {
   whitespace,
   whitespaces0,
   delimited,
-  sepBy1,
-  symbol,
 } from '../src/parser/utils'
 import { parser } from '../src/parser'
 import { none, some } from 'fp-ts/Option'
 import { Expr, Literal } from '../src/types'
-import { jlog } from '../src/utils'
-import { parse } from 'fp-ts/lib/Json'
 
 const wrap = (e: Expr) => right([[none, e, none], ''])
 const grouped = (l: Expr[]) => wrap(Expr.Group({ exprs: l }))
@@ -88,7 +84,7 @@ describe('Parser', () => {
           exprs: [
             Expr.AnyString(),
             Expr.Group({ exprs: [Expr.AnyBool(), Expr.Truthy()] }),
-          ]
+          ],
         }),
         Expr.AnyNumber(),
       ]),

@@ -130,7 +130,6 @@ describe('Basic tests', () => {
     it('should match sequence of matchers', () => {
       expect(
         matchAll(/ [seperator true], [id \s\T]+ /, [
-          // FIXME: Sequence doesn't work with Quantifiers
           { seperator: true },
           { id: '1' },
           { id: '2' },

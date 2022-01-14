@@ -1,5 +1,5 @@
-import { flow, pipe } from 'fp-ts/function'
-import { chain, map as mapE, left, orElse, right } from 'fp-ts/lib/Either'
+import { pipe } from 'fp-ts/function'
+import * as Either from 'fp-ts/Either'
 import {
   delimited,
   digits,
@@ -13,7 +13,6 @@ import {
   pair,
   Parser,
   ParserResult,
-  prefixed,
   satifyChar,
   sepBy1,
   suffixed,
@@ -22,8 +21,8 @@ import {
   whitespaces0,
 } from './utils'
 import { Expr, ListExpr, Literal } from '../types'
-import { getOrElse, map } from 'fp-ts/lib/Option'
-import { mapFst, snd } from 'fp-ts/lib/Tuple'
+import * as Option from 'fp-ts/Option'
+import { snd } from 'fp-ts/Tuple'
 
 const start = mapTo(symbol('^'), _ => Expr.Start())
 const end = mapTo(symbol('$'), _ => Expr.End())
@@ -34,8 +33,8 @@ const anyBool = mapTo(symbol('\\b'), _ => Expr.AnyBool())
 const truthy = mapTo(symbol('\\T'), _ => Expr.Truthy())
 const falsey = mapTo(symbol('\\F'), _ => Expr.Falsey())
 
-const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> = chain(
-  ([expr, input]) =>
+const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
+  Either.chain(([expr, input]) =>
     pipe(
       input,
       or([
@@ -43,9 +42,9 @@ const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> = chain(
         mapTo(symbol('+'), _ => Expr.OneOrMore({ expr })),
         mapTo(symbol('?'), _ => Expr.Optional({ expr })),
       ]),
-      orElse(_ => right([expr, input])),
+      Either.orElse(_ => Either.right([expr, input])),
     ),
-)
+  )
 
 const propRegex = /^[A-Za-z0-9_-]$/
 
@@ -75,8 +74,8 @@ const unsignedNum: Parser<number> = mapTo(
   ([int, decimal]) =>
     pipe(
       decimal,
-      map(snd),
-      getOrElse(() => '0'),
+      Option.map(snd),
+      Option.getOrElse(() => '0'),
       n => parseFloat(`${int}.${n}`),
     ),
 )
@@ -86,7 +85,7 @@ const numberLiteral: Parser<Literal> = mapTo(
   ([signO, n]) =>
     pipe(
       signO,
-      getOrElse(() => '+'),
+      Option.getOrElse(() => '+'),
       sign => (sign === '-' ? -1 : 1) * n,
       Literal.Number,
     ),
@@ -108,10 +107,10 @@ const infixOp =
     pipe(
       input,
       sepBy1(op, groupP),
-      chain(([exprs, nextInput]) =>
+      Either.chain(([exprs, nextInput]) =>
         exprs.length === 1
-          ? left(['Infix operator parsing error', input])
-          : right([exprs, nextInput]),
+          ? Either.left(['Infix operator parsing error', input])
+          : Either.right([exprs, nextInput]),
       ),
     )
 

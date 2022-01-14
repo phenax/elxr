@@ -1,6 +1,6 @@
-import { getOrElseW, map } from 'fp-ts/lib/Either'
-import { flow, pipe } from 'fp-ts/lib/function'
-import { fst } from 'fp-ts/lib/Tuple'
+import * as Either from 'fp-ts/Either'
+import { flow, pipe } from 'fp-ts/function'
+import { fst } from 'fp-ts/Tuple'
 import * as ev from './eval'
 import { parser } from './parser'
 import { ListExpr } from './types'
@@ -11,8 +11,8 @@ const toSourceString = (r: string | RegExp): string =>
 export const liexp: (r: string | RegExp) => ListExpr = flow(
   toSourceString,
   parser,
-  map(fst),
-  getOrElseW(([e, _]) => {
+  Either.map(fst),
+  Either.getOrElseW(([e, _]) => {
     throw new Error(e)
   }),
 )
