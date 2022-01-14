@@ -5,15 +5,18 @@ import {
   digits,
   many0,
   many1,
+  manyTill,
   mapTo,
   matchChar,
+  matchString,
   oneOf,
   optional,
   or,
   pair,
   Parser,
   ParserResult,
-  satifyChar,
+  prefixed,
+  satisfyChar,
   sepBy1,
   suffixed,
   symbol,
@@ -49,7 +52,7 @@ const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
 const propRegex = /^[A-Za-z0-9_-]$/
 
 export const propertyName: Parser<string> = pipe(
-  satifyChar(c => propRegex.test(c)),
+  satisfyChar(c => propRegex.test(c)),
   many1,
   p => mapTo(p, xs => xs.join('')),
   p => suffixed(p, whitespaces0),
@@ -94,9 +97,22 @@ const booleanLiteral: Parser<Literal> = mapTo(oneOf(['true', 'false']), b =>
   Literal.Boolean(b === 'true' ? true : false),
 )
 
+const stringDelimiter = matchChar('"')
+
+const stringLiteral: Parser<Literal> = mapTo(
+  prefixed(
+    stringDelimiter,
+    manyTill(
+      satisfyChar(_ => true),
+      stringDelimiter,
+    ),
+  ),
+  s => Literal.String(s.join('')),
+)
+
 const literalP: Parser<Literal> = delimited(
   whitespaces0,
-  or([booleanLiteral, numberLiteral]),
+  or([booleanLiteral, numberLiteral, stringLiteral]),
   whitespaces0,
 )
 

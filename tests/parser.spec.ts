@@ -6,7 +6,7 @@ import {
   delimited,
   not,
   symbol,
-  satifyChar,
+  satisfyChar,
   matchChar,
   manyTill,
   pair,
@@ -145,6 +145,14 @@ describe('Parser', () => {
     )
     expect(parser(/ false /.source)).toEqual(
       wrap(Expr.Literal(Literal.Boolean(false))),
+    )
+
+    // String literal
+    expect(parser(/ "foobar" /.source)).toEqual(
+      wrap(Expr.Literal(Literal.String('foobar'))),
+    )
+    expect(parser(/ "\nwowksadj\n\t wjksdlsd'' !@#%^(&^%$) " /.source)).toEqual(
+      wrap(Expr.Literal(Literal.String('\\nwowksadj\\n\\t wjksdlsd\'\' !@#%^(&^%$) '))),
     )
   })
 

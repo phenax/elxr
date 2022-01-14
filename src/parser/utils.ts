@@ -29,18 +29,20 @@ export const sepBy1 = <T>(sep: Parser<any>, parser: Parser<T>): Parser<T[]> =>
     ),
   )
 
-export const not = (parser: Parser<any>): Parser<null> => (input: string) =>
+export const not = (parser: Parser<any>): Parser<never> => (input: string) =>
   pipe(
     input,
     parser,
     Either.fold(
-      ([_left, inp]) => Either.right([null, inp]),
+      ([_left, inp]) => Either.right([null as never, inp]),
       ([_right, inp]) => Either.left(['`not` parser failed. Match found', inp])
     ),
   )
 
-export const manyTill = <T>(parser: Parser<T>, end: Parser<any>): Parser<T[]> =>
-  mapTo(pair(many0(suffixed(parser, not(end))), parser), ([xs, l]) => xs.concat([l]))
+export const manyTill = <T>(parser: Parser<T>, end: Parser<any>): Parser<T[]> => {
+  const p = pair(many0(suffixed(parser, not(end))), suffixed(parser, end))
+  return mapTo(p, ([xs, l]) => xs.concat([l]))
+}
 
 export const many0 = <T>(parser: Parser<T>): Parser<Array<T>> =>
   flow(
@@ -94,15 +96,16 @@ export const delimited = <T>(
   s: Parser<any>,
 ): Parser<T> => suffixed(prefixed(p, a), s)
 
-export const satifyChar =
+export const satisfyChar =
   (f: (c: char) => boolean): Parser<char> =>
   (input: string) => {
+    if (input.length === 0) return Either.left(['Unexpected end of input', input])
     const c = input.charAt(0)
     if (f(c)) return Either.right([c, input.slice(1)])
     return Either.left([`Expected to satisfy ${f}, got "${c}"`, input])
   }
 
-export const digit = satifyChar(c => /^[0-9]$/g.test(c))
+export const digit = satisfyChar(c => /^[0-9]$/g.test(c))
 
 export const digits: Parser<string> = flow(
   many1(digit),
@@ -121,7 +124,7 @@ export const or = <T>(parsers: Parser<T>[]): Parser<T> => {
     : (inp: string) => Either.left(['unable to match', inp])
 }
 
-export const matchChar = (ch: char): Parser<char> => satifyChar(eq(ch))
+export const matchChar = (ch: char): Parser<char> => satisfyChar(eq(ch))
 
 export const matchString =
   (s: string): Parser<string> =>
