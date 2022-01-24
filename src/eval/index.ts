@@ -1,7 +1,7 @@
 import { identity, pipe } from 'fp-ts/function'
 import { filter, takeLeftWhile, zip, zipWith } from 'fp-ts/Array'
 import * as Option from 'fp-ts/Option'
-import { index, Expr, ListExpr } from '../types'
+import { index, Expr, ListExpr, Literal } from '../types'
 import { match } from '../utils'
 
 export interface MatchGroupIndexed<T = any> {
@@ -52,11 +52,15 @@ const checkExpr = <T>(
         pipe(typeof item === 'boolean' ? [group(item, index)] : [], skip(1)),
       Truthy: _ => pipe(!!item ? [group(item, index)] : [], skip(1)),
       Falsey: _ => pipe(!item ? [group(item, index)] : [], skip(1)),
-      Literal: literal =>
-        pipe(
-          (literal.value as any) === item ? [group(item, index)] : [],
-          skip(1),
-        ),
+      Literal: literal => pipe(
+        literal,
+        match<boolean, Literal>({
+          RegExp: regex => regex && typeof item === 'string' && regex.test(item),
+          _: () => (literal.value as any) === item,
+        }),
+        passed => passed ? [group(item, index)] : [],
+        skip(1),
+      ),
 
       Group: ({ exprs }) => {
         const [head, ...tail] = exprs

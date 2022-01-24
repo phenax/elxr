@@ -1,4 +1,4 @@
-import {jlog} from '../src/utils'
+import { jlog } from '../src/utils'
 import { matchAll } from '../src'
 
 describe('Basic tests', () => {
@@ -43,6 +43,28 @@ describe('Basic tests', () => {
           { value: true, index: 3 },
         ],
       )
+
+      expect(
+        matchAll(/ [name "foobar"] /, [
+          {},
+          { name: 'foobar' },
+          { name: 'fuck' },
+        ]).groups,
+      ).toEqual([{ value: { name: 'foobar' }, index: 1 }])
+
+      expect(
+        matchAll(/ [name "test" | \/foo(bar|baz)\/] /, [
+          { name: 'test' },
+          { name: 'foobar' },
+          { name: 'foo' },
+          { name: 'foobaz' },
+          {},
+        ]).groups,
+      ).toEqual([
+        { value: { name: 'test' }, index: 0 },
+        { value: { name: 'foobar' }, index: 1 },
+        { value: { name: 'foobaz' }, index: 3 },
+      ])
     })
 
     it('should match simple expression', () => {
@@ -200,31 +222,17 @@ describe('Basic tests', () => {
     })
 
     it('should match min-max quantified expressions', () => {
-      expect(
-        matchAll(/[age \n]{2, 4}/, [
-          {},
-          { age: 1 },
-          '',
-        ]).groups,
-      ).toEqual([])
+      expect(matchAll(/[age \n]{2, 4}/, [{}, { age: 1 }, '']).groups).toEqual(
+        [],
+      )
 
       expect(
-        matchAll(/[age \n]{2, 4}/, [
-          {},
-          { age: 1 },
-          { age: 0 },
-          '',
-        ]).groups,
+        matchAll(/[age \n]{2, 4}/, [{}, { age: 1 }, { age: 0 }, '']).groups,
       ).toEqual([{ value: [{ age: 1 }, { age: 0 }], index: 1 }])
 
       expect(
-        matchAll(/[age \n]{2, 4}/, [
-          {},
-          { age: 1 },
-          { age: 2 },
-          { age: 0 },
-          '',
-        ]).groups,
+        matchAll(/[age \n]{2, 4}/, [{}, { age: 1 }, { age: 2 }, { age: 0 }, ''])
+          .groups,
       ).toEqual([{ value: [{ age: 1 }, { age: 2 }, { age: 0 }], index: 1 }])
 
       expect(
@@ -237,7 +245,9 @@ describe('Basic tests', () => {
           { age: 4 },
           '',
         ]).groups,
-      ).toEqual([{ value: [{ age: 1 }, { age: 2 }, { age: 0 }, { age: 8 }], index: 1 }])
+      ).toEqual([
+        { value: [{ age: 1 }, { age: 2 }, { age: 0 }, { age: 8 }], index: 1 },
+      ])
 
       expect(
         matchAll(/[age \n]{2, 4}/, [
@@ -251,8 +261,8 @@ describe('Basic tests', () => {
           '',
         ]).groups,
       ).toEqual([
-          { value: [{ age: 1 }, { age: 2 }, { age: 0 }, { age: 8 }], index: 1 },
-          { value: [{ age: 4 }, { age: 9 }], index: 5 },
+        { value: [{ age: 1 }, { age: 2 }, { age: 0 }, { age: 8 }], index: 1 },
+        { value: [{ age: 4 }, { age: 9 }], index: 5 },
       ])
     })
   })
