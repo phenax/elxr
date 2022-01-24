@@ -24,7 +24,7 @@ Whitespaces are ignored (except within literals)
 * `a,b` => match `a` on current item followed by `b` on the next item (**sequence**)
 * `[name \s\T]` => match **property** of object (example matches items with property `name` as non-empty string)
 * `> n` | `>= n` | `< n` | `<= n` => **Comparison** with literal number [TODO]
-* `/pat/` => Test string values against **regex** [TODO]
+* `/pat/` => Test string values against **regex**
 * `"foobar"` => String literal (example matches the string `foobar`)
 * `-2.05` => Number literal (example matches the number `-2.05`)
 * `true` => Boolean literal (example matches the value `true`)
@@ -35,7 +35,6 @@ Whitespaces are ignored (except within literals)
   - [ ] `match` function
   - [ ] Named capture groups
   - [ ] Non-capturing groups
-  - [ ] Regular expressions for string items
   - [ ] Nested list evaluation
   - [ ] Number comarison
 
