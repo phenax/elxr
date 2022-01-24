@@ -18,7 +18,7 @@ Whitespaces are ignored (except within literals)
 * `a|b` => match `a` **or** `b`
 * `a*` => **Zero or more** consecutive instances of pattern `a` in the list
 * `a+` => **One or more** consecutive instances of pattern `a` in the list
-* `a{2, 5}` => **Min-Max** quantifiers (example matches `a` more than 2 times but less than 5) [TODO]
+* `a{2, 5}` => **Min-Max** quantifiers (example matches `a` more than 2 times but less than 5)
 * `(\s\T)` => **Group** (example matches any non-empty string)
 * `^a$` => `^` indicates **start** of list, and `$` indicates **end** of list [TODO]
 * `a,b` => match `a` on current item followed by `b` on the next item (**sequence**)
@@ -31,12 +31,10 @@ Whitespaces are ignored (except within literals)
 
 
 ### TODO
-  - [X] `matchAll` function
   - [ ] `replaceAll` function
   - [ ] `match` function
   - [ ] Named capture groups
   - [ ] Non-capturing groups
-  - [ ] `{min, max}` quantifiers
   - [ ] Regular expressions for string items
   - [ ] Nested list evaluation
   - [ ] Number comarison
