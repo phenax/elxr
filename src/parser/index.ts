@@ -135,8 +135,11 @@ const regexLiteral: Parser<Literal> = mapTo(
   prefixed(
     regexDelimiter,
     pair(
-      manyTill(satisfyChar(_ => true), regexDelimiter),
-      many0(satisfyChar(c => REGEX_FLAGS.includes(c)))
+      manyTill(
+        satisfyChar(_ => true),
+        regexDelimiter,
+      ),
+      many0(satisfyChar(c => REGEX_FLAGS.includes(c))),
     ),
   ),
   ([rs, flags]) => Literal.RegExp(new RegExp(rs.join(''), flags.join(''))),

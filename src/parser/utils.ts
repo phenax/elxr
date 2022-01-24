@@ -29,17 +29,23 @@ export const sepBy1 = <T>(sep: Parser<any>, parser: Parser<T>): Parser<T[]> =>
     ),
   )
 
-export const not = (parser: Parser<any>): Parser<never> => (input: string) =>
-  pipe(
-    input,
-    parser,
-    Either.fold(
-      ([_left, inp]) => Either.right([null as never, inp]),
-      ([_right, inp]) => Either.left(['`not` parser failed. Match found', inp])
-    ),
-  )
+export const not =
+  (parser: Parser<any>): Parser<never> =>
+  (input: string) =>
+    pipe(
+      input,
+      parser,
+      Either.fold(
+        ([_left, inp]) => Either.right([null as never, inp]),
+        ([_right, inp]) =>
+          Either.left(['`not` parser failed. Match found', inp]),
+      ),
+    )
 
-export const manyTill = <T>(parser: Parser<T>, end: Parser<any>): Parser<T[]> => {
+export const manyTill = <T>(
+  parser: Parser<T>,
+  end: Parser<any>,
+): Parser<T[]> => {
   const p = pair(many0(suffixed(parser, not(end))), suffixed(parser, end))
   return mapTo(p, ([xs, l]) => xs.concat([l]))
 }
@@ -99,7 +105,8 @@ export const delimited = <T>(
 export const satisfyChar =
   (f: (c: char) => boolean): Parser<char> =>
   (input: string) => {
-    if (input.length === 0) return Either.left(['Unexpected end of input', input])
+    if (input.length === 0)
+      return Either.left(['Unexpected end of input', input])
     const c = input.charAt(0)
     if (f(c)) return Either.right([c, input.slice(1)])
     return Either.left([`Expected to satisfy ${f}, got "${c}"`, input])

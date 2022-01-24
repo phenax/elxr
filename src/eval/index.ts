@@ -52,15 +52,17 @@ const checkExpr = <T>(
         pipe(typeof item === 'boolean' ? [group(item, index)] : [], skip(1)),
       Truthy: _ => pipe(!!item ? [group(item, index)] : [], skip(1)),
       Falsey: _ => pipe(!item ? [group(item, index)] : [], skip(1)),
-      Literal: literal => pipe(
-        literal,
-        match<boolean, Literal>({
-          RegExp: regex => regex && typeof item === 'string' && regex.test(item),
-          _: () => (literal.value as any) === item,
-        }),
-        passed => passed ? [group(item, index)] : [],
-        skip(1),
-      ),
+      Literal: literal =>
+        pipe(
+          literal,
+          match<boolean, Literal>({
+            RegExp: regex =>
+              regex && typeof item === 'string' && regex.test(item),
+            _: () => (literal.value as any) === item,
+          }),
+          passed => (passed ? [group(item, index)] : []),
+          skip(1),
+        ),
 
       Group: ({ exprs }) => {
         const [head, ...tail] = exprs
@@ -105,7 +107,13 @@ const checkExpr = <T>(
 
       OneOrMore: ({ expr }) => {
         const { localSkip, getSkips } = accumulateSkip()
-        const result = checkExpr(Expr.ZeroOrMore({ expr }), item, list, index, localSkip)
+        const result = checkExpr(
+          Expr.ZeroOrMore({ expr }),
+          item,
+          list,
+          index,
+          localSkip,
+        )
         return pipe(
           result[0].value.length > 0 ? result : [],
           skip(getSkips().reduce((a, b) => a + b, 0)),
@@ -114,7 +122,13 @@ const checkExpr = <T>(
 
       MinMax: ({ expr, min, max }) => {
         const { localSkip, getSkips } = accumulateSkip()
-        const result = checkExpr(Expr.ZeroOrMore({ expr }), item, list, index, localSkip)
+        const result = checkExpr(
+          Expr.ZeroOrMore({ expr }),
+          item,
+          list,
+          index,
+          localSkip,
+        )
         // TODO: Use nested skips
 
         const matches = result[0].value.length
@@ -135,10 +149,7 @@ const checkExpr = <T>(
           list,
           takeLeftWhile(a => checkExpr(expr, a, list, index).length > 0),
         )
-        return pipe(
-          [group(matches, index)],
-          skip(matches.length || 1),
-        )
+        return pipe([group(matches, index)], skip(matches.length || 1))
       },
 
       Sequence: ({ exprs }) => {
