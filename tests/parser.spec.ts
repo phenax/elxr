@@ -14,7 +14,7 @@ import {
 import { parser } from '../src/parser'
 import { none, some } from 'fp-ts/Option'
 import { Expr, Literal } from '../src/types'
-import {jlog} from '../src/utils'
+import { jlog } from '../src/utils'
 
 const wrap = (e: Expr) => right([[none, e, none], ''])
 const grouped = (l: Expr[]) => wrap(Expr.Group({ exprs: l }))
@@ -75,6 +75,37 @@ describe('Parser', () => {
           some(Expr.End()),
         ],
         '',
+      ]),
+    )
+
+    expect(parser(/ \s([age \n]{ 2, 5 }) /.source)).toEqual(
+      grouped([
+        Expr.AnyString(),
+        Expr.MinMax({
+          expr: Expr.PropertyMatch({ name: 'age', expr: Expr.AnyNumber() }),
+          min: 2,
+          max: 5,
+        }),
+      ]),
+    )
+    expect(parser(/ \s([age \n]{ 2, }) /.source)).toEqual(
+      grouped([
+        Expr.AnyString(),
+        Expr.MinMax({
+          expr: Expr.PropertyMatch({ name: 'age', expr: Expr.AnyNumber() }),
+          min: 2,
+          max: Infinity,
+        }),
+      ]),
+    )
+    expect(parser(/ \s([age \n]{ , 20 }) /.source)).toEqual(
+      grouped([
+        Expr.AnyString(),
+        Expr.MinMax({
+          expr: Expr.PropertyMatch({ name: 'age', expr: Expr.AnyNumber() }),
+          min: 0,
+          max: 20,
+        }),
       ]),
     )
   })
@@ -152,7 +183,11 @@ describe('Parser', () => {
       wrap(Expr.Literal(Literal.String('foobar'))),
     )
     expect(parser(/ "\nwowksadj\n\t wjksdlsd'' !@#%^(&^%$) " /.source)).toEqual(
-      wrap(Expr.Literal(Literal.String('\\nwowksadj\\n\\t wjksdlsd\'\' !@#%^(&^%$) '))),
+      wrap(
+        Expr.Literal(
+          Literal.String("\\nwowksadj\\n\\t wjksdlsd'' !@#%^(&^%$) "),
+        ),
+      ),
     )
   })
 

@@ -3,6 +3,8 @@ import { constructors, Union } from './utils'
 
 type _ = never
 
+export type index = number
+
 export type Literal = Union<{
   String: string
   Number: number
@@ -15,6 +17,7 @@ export type Expr = Union<{
   End: _
   Optional: { expr: Expr }
   OneOrMore: { expr: Expr }
+  MinMax: { expr: Expr, min: index, max: index }
   ZeroOrMore: { expr: Expr }
   AnyItem: _
   Or: { exprs: Expr[] }

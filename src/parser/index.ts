@@ -23,7 +23,7 @@ import {
   tuple3,
   whitespaces0,
 } from './utils'
-import { Expr, ListExpr, Literal } from '../types'
+import { Expr, index, ListExpr, Literal } from '../types'
 import * as Option from 'fp-ts/Option'
 import { snd } from 'fp-ts/Tuple'
 
@@ -36,6 +36,13 @@ const anyBool = mapTo(symbol('\\b'), _ => Expr.AnyBool())
 const truthy = mapTo(symbol('\\T'), _ => Expr.Truthy())
 const falsey = mapTo(symbol('\\F'), _ => Expr.Falsey())
 
+const parseQuantifier = (s: Option.Option<string>, def: index): index =>
+  pipe(
+    s,
+    Option.map(s => parseInt(s, 10)),
+    Option.getOrElse(() => def),
+  )
+
 const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
   Either.chain(([expr, input]) =>
     pipe(
@@ -44,6 +51,18 @@ const wrapQuantifiers: (e: ParserResult<Expr>) => ParserResult<Expr> =
         mapTo(symbol('*'), _ => Expr.ZeroOrMore({ expr })),
         mapTo(symbol('+'), _ => Expr.OneOrMore({ expr })),
         mapTo(symbol('?'), _ => Expr.Optional({ expr })),
+        mapTo(
+          pair(
+            prefixed(symbol('{'), optional(digits)),
+            delimited(symbol(','), optional(digits), symbol('}')),
+          ),
+          ([min, max]) =>
+            Expr.MinMax({
+              expr,
+              min: parseQuantifier(min, 0),
+              max: parseQuantifier(max, Infinity),
+            }),
+        ),
       ]),
       Either.orElse(_ => Either.right([expr, input])),
     ),

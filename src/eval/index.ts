@@ -1,7 +1,7 @@
 import { identity, pipe } from 'fp-ts/function'
 import { filter, takeLeftWhile, zip, zipWith } from 'fp-ts/Array'
 import * as Option from 'fp-ts/Option'
-import { Expr, ListExpr } from '../types'
+import { index, Expr, ListExpr } from '../types'
 import { match } from '../utils'
 
 export interface MatchGroupIndexed<T = any> {
@@ -17,8 +17,6 @@ const group = <T>(value: T, index: number): MatchGroupIndexed<T> => ({
   value,
   index,
 })
-
-type index = number
 
 const indexed = <T>(ls: T[]): Array<[number, T]> => ls.map((x, i) => [i, x])
 
