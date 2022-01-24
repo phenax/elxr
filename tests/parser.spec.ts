@@ -146,51 +146,6 @@ describe('Parser', () => {
     )
   })
 
-  it('literals', () => {
-    // unsigned numbers
-    expect(parser(/ 0.105 /.source)).toEqual(
-      wrap(Expr.Literal(Literal.Number(0.105))),
-    )
-    expect(parser(/ 9 /.source)).toEqual(wrap(Expr.Literal(Literal.Number(9))))
-    expect(parser(/ 23 /.source)).toEqual(
-      wrap(Expr.Literal(Literal.Number(23))),
-    )
-
-    // signed numbers
-    expect(parser(/ 23.025 /.source)).toEqual(
-      wrap(Expr.Literal(Literal.Number(23.025))),
-    )
-    expect(parser(/ -23.025 /.source)).toEqual(
-      wrap(Expr.Literal(Literal.Number(-23.025))),
-    )
-    expect(parser(/ 23 /.source)).toEqual(
-      wrap(Expr.Literal(Literal.Number(23))),
-    )
-    expect(parser(/ -23 /.source)).toEqual(
-      wrap(Expr.Literal(Literal.Number(-23))),
-    )
-
-    // boolean
-    expect(parser(/ true /.source)).toEqual(
-      wrap(Expr.Literal(Literal.Boolean(true))),
-    )
-    expect(parser(/ false /.source)).toEqual(
-      wrap(Expr.Literal(Literal.Boolean(false))),
-    )
-
-    // String literal
-    expect(parser(/ "foobar" /.source)).toEqual(
-      wrap(Expr.Literal(Literal.String('foobar'))),
-    )
-    expect(parser(/ "\nwowksadj\n\t wjksdlsd'' !@#%^(&^%$) " /.source)).toEqual(
-      wrap(
-        Expr.Literal(
-          Literal.String("\\nwowksadj\\n\\t wjksdlsd'' !@#%^(&^%$) "),
-        ),
-      ),
-    )
-  })
-
   it('sequence of values', () => {
     expect(parser(/true, \s\T, \n/.source)).toEqual(
       wrap(
@@ -203,5 +158,64 @@ describe('Parser', () => {
         }),
       ),
     )
+  })
+
+  describe('Literals', () => {
+    it('numbers', () => {
+      // unsigned numbers
+      expect(parser(/ 0.105 /.source)).toEqual(
+        wrap(Expr.Literal(Literal.Number(0.105))),
+      )
+      expect(parser(/ 9 /.source)).toEqual(
+        wrap(Expr.Literal(Literal.Number(9))),
+      )
+      expect(parser(/ 23 /.source)).toEqual(
+        wrap(Expr.Literal(Literal.Number(23))),
+      )
+
+      // signed numbers
+      expect(parser(/ 23.025 /.source)).toEqual(
+        wrap(Expr.Literal(Literal.Number(23.025))),
+      )
+      expect(parser(/ -23.025 /.source)).toEqual(
+        wrap(Expr.Literal(Literal.Number(-23.025))),
+      )
+      expect(parser(/ 23 /.source)).toEqual(
+        wrap(Expr.Literal(Literal.Number(23))),
+      )
+      expect(parser(/ -23 /.source)).toEqual(
+        wrap(Expr.Literal(Literal.Number(-23))),
+      )
+    })
+
+    it('boolean', () => {
+      expect(parser(/ true /.source)).toEqual(
+        wrap(Expr.Literal(Literal.Boolean(true))),
+      )
+      expect(parser(/ false /.source)).toEqual(
+        wrap(Expr.Literal(Literal.Boolean(false))),
+      )
+    })
+
+    it('string', () => {
+      expect(parser(/ "foobar" /.source)).toEqual(
+        wrap(Expr.Literal(Literal.String('foobar'))),
+      )
+      expect(
+        parser(/ "\nwowksadj\n\t wjksdlsd'' !@#%^(&^%$) " /.source),
+      ).toEqual(
+        wrap(
+          Expr.Literal(
+            Literal.String("\\nwowksadj\\n\\t wjksdlsd'' !@#%^(&^%$) "),
+          ),
+        ),
+      )
+    })
+
+    it('regex', () => {
+      expect(parser(/ \/^foo(bar|baz)?\/gi /.source)).toEqual(
+        wrap(Expr.Literal(Literal.RegExp(/^foo(bar|baz)?/gi))),
+      )
+    })
   })
 })

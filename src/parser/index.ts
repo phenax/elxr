@@ -129,9 +129,22 @@ const stringLiteral: Parser<Literal> = mapTo(
   s => Literal.String(s.join('')),
 )
 
+const REGEX_FLAGS = ['m', 'g', 'i', 'd', 's', 'u', 'y']
+const regexDelimiter = prefixed(optional(matchChar('\\')), matchChar('/'))
+const regexLiteral: Parser<Literal> = mapTo(
+  prefixed(
+    regexDelimiter,
+    pair(
+      manyTill(satisfyChar(_ => true), regexDelimiter),
+      many0(satisfyChar(c => REGEX_FLAGS.includes(c)))
+    ),
+  ),
+  ([rs, flags]) => Literal.RegExp(new RegExp(rs.join(''), flags.join(''))),
+)
+
 const literalP: Parser<Literal> = delimited(
   whitespaces0,
-  or([booleanLiteral, numberLiteral, stringLiteral]),
+  or([booleanLiteral, numberLiteral, stringLiteral, regexLiteral]),
   whitespaces0,
 )
 

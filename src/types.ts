@@ -7,6 +7,7 @@ export type index = number
 
 export type Literal = Union<{
   String: string
+  RegExp: RegExp
   Number: number
   Boolean: boolean
 }>
