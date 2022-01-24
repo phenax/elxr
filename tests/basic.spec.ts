@@ -198,5 +198,46 @@ describe('Basic tests', () => {
         },
       ])
     })
+
+    it('should match min-max quantified expressions', () => {
+      expect(
+        matchAll(/[age \n]{2, 4}/, [
+          {},
+          { age: 1 },
+          '',
+        ]).groups,
+      ).toEqual([])
+
+      expect(
+        matchAll(/[age \n]{2, 4}/, [
+          {},
+          { age: 1 },
+          { age: 0 },
+          '',
+        ]).groups,
+      ).toEqual([{ value: [{ age: 1 }, { age: 0 }], index: 1 }])
+
+      expect(
+        matchAll(/[age \n]{2, 4}/, [
+          {},
+          { age: 1 },
+          { age: 2 },
+          { age: 0 },
+          '',
+        ]).groups,
+      ).toEqual([{ value: [{ age: 1 }, { age: 2 }, { age: 0 }], index: 1 }])
+
+      expect(
+        matchAll(/[age \n]{2, 4}/, [
+          {},
+          { age: 1 },
+          { age: 2 },
+          { age: 0 },
+          { age: 8 },
+          { age: 4 },
+          '',
+        ]).groups,
+      ).toEqual([{ value: [{ age: 1 }, { age: 2 }, { age: 0 }, { age: 8 }], index: 1 }])
+    })
   })
 })

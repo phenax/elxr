@@ -108,6 +108,23 @@ const checkExpr = <T>(
         )
       },
 
+      MinMax: ({ expr, min, max }) => {
+        const { localSkip, getSkips } = accumulateSkip()
+        const result = checkExpr(Expr.ZeroOrMore({ expr }), item, list, index, localSkip)
+        // TODO: Use nested skips
+
+        const matches = result[0].value.length
+        const capturedMatchCount = matches < min ? 0 : Math.min(matches, max)
+        // const skipCount = getSkips().reduce((a, b) => a + b, 0)
+
+        return pipe(
+          result
+            .map(r => ({ ...r, value: r.value.slice(0, capturedMatchCount) }))
+            .filter(r => r.value.length > 0),
+          skip(capturedMatchCount || 1),
+        )
+      },
+
       ZeroOrMore: ({ expr }) => {
         // TODO: Nested quantified expressions?
         const matches = pipe(
