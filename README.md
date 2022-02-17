@@ -45,12 +45,12 @@ Whitespaces are ignored (except within literals)
 
 ```js
 // | Match for any number or any non-empty string or any object with `prop` is true
-matchAll(/ \n | \s\T | [prop true] /, [null, 23, 'wow', '', { prop: true }, { prop: false } ]
+matchAll(/ \n | \s\T /, [null, 23, '', 'wow', false ]
+
 // > {
 //   groups: [
 //     { index: 1, value: 23 }, // \n
-//     { index: 2, value: 'wow' }, // \s\T
-//     { index: 4, value: { prop: true } }, // [prop true]
+//     { index: 3, value: 'wow' }, // \s\T
 //   ]
 // }
 ```
@@ -67,6 +67,7 @@ matchAll(/ [seperator true], [id \s\T]+ /, [
   { id: '5' },
   { id: '6' },
 ])
+
 // > {
 //   groups: [
 //     {
