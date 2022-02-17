@@ -8,7 +8,6 @@ import {
   manyTill,
   mapTo,
   matchChar,
-  matchString,
   oneOf,
   optional,
   or,

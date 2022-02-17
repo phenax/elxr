@@ -2,7 +2,7 @@ import { identity, pipe } from 'fp-ts/function'
 import { filter, takeLeftWhile, zip, zipWith } from 'fp-ts/Array'
 import * as Option from 'fp-ts/Option'
 import { index, Expr, ListExpr, Literal } from '../types'
-import { match } from '../utils'
+import { jlog, match } from '../utils'
 
 export interface MatchGroupIndexed<T = any> {
   value: T
@@ -25,7 +25,7 @@ const accumulateSkip = () => {
   return {
     localSkip:
       (i: index) =>
-      <T>(x: T): T => (skipIndexes.push(i), x),
+        <T>(x: T): T => (skipIndexes.push(i), x),
     getSkips: () => skipIndexes,
   }
 }
@@ -38,7 +38,7 @@ const checkExpr = <T>(
   skip: (
     n: index,
   ) => (m: MatchGroupIndexed<any>[]) => MatchGroupIndexed<any>[] = _ =>
-    identity,
+      identity,
 ): MatchGroupIndexed<any>[] => {
   return pipe(
     expr,
@@ -144,7 +144,6 @@ const checkExpr = <T>(
       },
 
       ZeroOrMore: ({ expr }) => {
-        // TODO: Nested quantified expressions?
         const matches = pipe(
           list,
           takeLeftWhile(a => checkExpr(expr, a, list, index).length > 0),
@@ -168,10 +167,11 @@ const checkExpr = <T>(
         }
 
         const groups = getGroups()
-        const skips = Math.max(
+        const skips = groups.length === 0 ? 1 : Math.max(
           1,
-          getSkips().reduce((a, b) => a + b, -1),
+          getSkips().reduce((a, b) => a + b, 0),
         )
+
         return pipe(groups, skip(skips))
       },
 
@@ -193,8 +193,8 @@ export const matchAll = <T>(
 
     const next =
       (i: number = 1) =>
-      (curMatch: MatchGroupIndexed[]) =>
-        [...curMatch, ...check(index + i, ls.slice(i), expr)]
+        (curMatch: MatchGroupIndexed[]) =>
+          [...curMatch, ...check(index + i, ls.slice(i), expr)]
 
     return checkExpr(expr, item, ls, index, next)
   }
@@ -202,4 +202,29 @@ export const matchAll = <T>(
   return {
     groups: check(0, list, expr),
   }
+}
+
+export const replaceAll = <T>(
+  [startO, expr, endO]: ListExpr,
+  replacer: (v: T, match: MatchGroupIndexed<T>, i: index) => T[],
+  list: T[],
+): T[] => {
+  const check = (index: number, ls: T[], expr: Expr): T[] => {
+    if (ls.length === 0) return []
+
+    const [item] = ls
+
+    const next =
+      (skip: number = 1) =>
+        (curMatch: MatchGroupIndexed[]): MatchGroupIndexed<T>[] => {
+          const [match] = curMatch
+          const vals = match ? replacer(item, match, index) : ls.slice(0, skip)
+          // console.log(i, curMatch, vals)
+          return [...vals, ...check(index + skip, ls.slice(skip), expr)] as any
+        }
+
+    return checkExpr(expr, item, ls, index, next) as any
+  }
+
+  return check(0, list, expr)
 }

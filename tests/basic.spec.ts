@@ -219,6 +219,37 @@ describe('Basic tests', () => {
           index: 6,
         },
       ])
+
+      expect(
+        matchAll(/"start", \s, \n/, [
+          1,
+          'start',
+          'x',
+          2,
+          'start',
+          3,
+          'start',
+          'y',
+          4,
+        ]).groups,
+      ).toEqual([
+        {
+          value: [
+            [{ value: 'start', index: 1 }],
+            [{ value: 'x', index: 2 }],
+            [{ value: 2, index: 3 }],
+          ],
+          index: 1,
+        },
+        {
+          value: [
+            [{ value: 'start', index: 6 }],
+            [{ value: 'y', index: 7 }],
+            [{ value: 4, index: 8 }],
+          ],
+          index: 6,
+        },
+      ])
     })
 
     it('should match min-max quantified expressions', () => {

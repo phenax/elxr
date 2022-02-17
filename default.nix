@@ -5,8 +5,8 @@ mkShell rec {
     nodejs-16_x
     yarn
     efm-langserver
-    nodePackages.vls
     nodePackages.prettier
+    nodePackages.eslint
     nodePackages.typescript-language-server
   ];
 }
