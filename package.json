@@ -1,10 +1,10 @@
 {
-  "name": "elrx",
+  "name": "elxr",
   "version": "0.0.0",
   "description": "__",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "repository": "https://github.com/phenax/elrx.git",
+  "repository": "https://github.com/phenax/elxr.git",
   "author": "Akshay Nair <phenax5@gmail.com>",
   "license": "MIT",
   "scripts": {
