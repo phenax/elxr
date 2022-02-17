@@ -98,7 +98,7 @@ matchAll(/ [seperator true], [id \s\T]+ /, [
 #### replaceAll
 
 ```js
-// | Match for any number or any non-empty string or any object with `prop` is true
+// | Replace any sequence of one or more numbers by their sum
 const replacer = (_, matches) => matches.value.reduce((a, b) => a + b, 0)
 replaceAll(/ \n+ /, replacer, [ 'start', 3, 5, 'mid', 2, 0, 4, 'end' ])
 
