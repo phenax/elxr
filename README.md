@@ -2,12 +2,21 @@
 
 Regular expression-like syntax for list operations. An experiment generalizing regex-like operations to a list.
 
-[![forthebadge](https://forthebadge.com/images/badges/you-didnt-ask-for-this.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/kinda-sfw.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/0-percent-optimized.svg)](https://forthebadge.com)
+[![npm](https://img.shields.io/npm/v/elxr?style=for-the-badge)](https://www.npmjs.com/package/elxr)
 
 
-### Syntax
+## Install
+To install the latest stable version of elxr -
+
+```bash
+yarn add elxr
+// OR
+npm install --save elxr
+```
+
+
+
+## Syntax
 Whitespaces are ignored (except within literals)
 
 * `\s` => Any **string**
@@ -34,8 +43,9 @@ Whitespaces are ignored (except within literals)
 * `(?: \s\T)` => Non-capturing group (example checks for `\s\T` but doesn't return it as a match) <sup>[TODO]</sup>
 
 
-### Examples
 
+
+## Examples
 
 #### matchAll
 
@@ -94,4 +104,10 @@ replaceAll(/ \n+ /, replacer, [ 'start', 3, 5, 'mid', 2, 0, 4, 'end' ])
 
 // > [ 'start', 8, 'mid', 6, 'end' ]
 ```
+
+
+
+
+## License
+Elxr is licensed under [MIT](./LICENSE)
 
