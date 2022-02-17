@@ -36,6 +36,9 @@ Whitespaces are ignored (except within literals)
 
 ### Examples
 
+
+#### matchAll
+
 ```js
 // | Match for any number or any non-empty string or any object with `prop` is true
 matchAll(/ \n | \s\T /, [null, 23, '', 'wow', false ]
@@ -79,5 +82,16 @@ matchAll(/ [seperator true], [id \s\T]+ /, [
 //     },
 //   ]
 // }
+```
+
+
+#### replaceAll
+
+```js
+// | Match for any number or any non-empty string or any object with `prop` is true
+const replacer = (_, matches) => matches.value.reduce((a, b) => a + b, 0)
+replaceAll(/ \n+ /, replacer, [ 'start', 3, 5, 'mid', 2, 0, 4, 'end' ])
+
+// > [ 'start', 8, 'mid', 6, 'end' ]
 ```
 

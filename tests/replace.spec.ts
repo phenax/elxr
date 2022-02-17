@@ -3,6 +3,15 @@ import { replaceAll } from '../src'
 
 describe('Basic tests', () => {
   it('should', () => {
+    const replacer = (_, matches) => [matches.value.reduce((a, b) => a + b, 0)]
+    expect(replaceAll(/ \n+ /, replacer, ['start', 3, 5, 'mid', 2, 0, 4, 'end'])).toEqual([
+      'start',
+      8,
+      'mid',
+      6,
+      'end',
+    ])
+
     expect(
       replaceAll(/"start", \s, \n/, _ => ['replaced'], [
         1,
