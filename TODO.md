@@ -5,9 +5,10 @@
   - [X] Eval: Next item/Sequence
   - [X] Func: matchAll
   - [X] `{2, 5}` quantifiers
+  - [X] Func: replaceAll
   - [ ] Eval: `^$` start-end
-  - [ ] Func: replace
   - [ ] Not/Inverse
   - [ ] Named capture groups
   - [ ] Non-capture groups
+  - [ ] `[prop]` should match object with given property
 
