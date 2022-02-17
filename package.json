@@ -1,10 +1,10 @@
 {
-  "name": "list-exp",
+  "name": "elrx",
   "version": "0.0.0",
   "description": "__",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "repository": "https://github.com/phenax/list-exp.git",
+  "repository": "https://github.com/phenax/elrx.git",
   "author": "Akshay Nair <phenax5@gmail.com>",
   "license": "MIT",
   "scripts": {

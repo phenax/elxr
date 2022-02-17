@@ -1,6 +1,6 @@
-# ListExp [ WIP ]
+# Elxr (List expressions)
 
-Regular expression-like syntax for list operations. Toy project experimenting with generalizing regex-like operations to a list.
+Regular expression-like syntax for list operations. An experiment generalizing regex-like operations to a list.
 
 [![forthebadge](https://forthebadge.com/images/badges/you-didnt-ask-for-this.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/kinda-sfw.svg)](https://forthebadge.com)
@@ -13,6 +13,8 @@ Whitespaces are ignored (except within literals)
 * `\s` => Any **string**
 * `\n` => Any **number**
 * `\b` => Any **boolean**
+* `\o` => Any **object** (has to be a record) [TODO]
+* `\a` => Any **array** [TODO]
 * `\T` => Any **truthy** value
 * `\F` => Any **falsey** value
 * `a|b` => match `a` **or** `b`
