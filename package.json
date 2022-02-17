@@ -1,13 +1,19 @@
 {
   "name": "elxr",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Regular expression-like syntax generalized for list operations",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "repository": "https://github.com/phenax/elxr.git",
   "author": "Akshay Nair <phenax5@gmail.com>",
   "license": "MIT",
-  "keywords": ["regex", "regular", "expressions", "list", "typescript"],
+  "keywords": [
+    "regex",
+    "regular",
+    "expressions",
+    "list",
+    "typescript"
+  ],
   "scripts": {
     "tsc": "tsc --emitDeclarationOnly --outDir lib",
     "test": "jest",
