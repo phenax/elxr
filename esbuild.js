@@ -8,7 +8,7 @@ esbuild
     sourcemap: true,
     minify: true,
     splitting: false,
-    format: 'esm',
-    target: ['esnext']
+    format: 'cjs',
+    target: ['es2015']
   })
-  .catch(() => process.exit(1));
+  .catch(e => (console.error(e), process.exit(1)));

@@ -8,7 +8,7 @@ import { index, ListExpr } from './types'
 const toSourceString = (r: string | RegExp): string =>
   typeof r === 'string' ? r : r.source
 
-export const liexp: (r: string | RegExp) => ListExpr = flow(
+const elxr: (r: string | RegExp) => ListExpr = flow(
   toSourceString,
   parser,
   Either.map(fst),
@@ -18,7 +18,7 @@ export const liexp: (r: string | RegExp) => ListExpr = flow(
 )
 
 export const matchAll = <T>(exp: string | RegExp, list: T[]) =>
-  pipe(exp, liexp, lxp => ev.matchAll(lxp, list))
+  pipe(exp, elxr, lxp => ev.matchAll(lxp, list))
 
 export const replaceAll = <T>(exp: string | RegExp, replacer: (v: T, m: ev.MatchGroupIndexed<T>, i: index) => T[], list: T[]) =>
-  pipe(exp, liexp, lxp => ev.replaceAll(lxp, replacer, list))
+  pipe(exp, elxr, lxp => ev.replaceAll(lxp, replacer, list))
