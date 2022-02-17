@@ -1,8 +1,5 @@
 import { jlog } from '../src/utils'
 import { replaceAll } from '../src'
-import * as elxr from 'elxr'
-
-console.log(elxr)
 
 describe('Basic tests', () => {
   it('should', () => {

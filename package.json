@@ -30,7 +30,6 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
-    "elxr": "^0.0.1",
     "fp-ts": "^2.11.6"
   }
 }

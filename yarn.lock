@@ -989,13 +989,6 @@ electron-to-chromium@^1.4.17:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.36.tgz#446c6184dbe5baeb5eae9a875490831e4bc5319a"
   integrity sha512-MbLlbF39vKrXWlFEFpCgDHwdlz4O3LmHM5W4tiLRHjSmEUXjJjz8sZkMgWgvYxlZw3N1iDTmCEtOkkESb5TMCg==
 
-elxr@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/elxr/-/elxr-0.0.1.tgz#7218d4c016d2c11c7175a3d583d29f563655e93d"
-  integrity sha512-CHWIsdS3zu0E/8ub56FEWrCLXm5/nBk6VxexZ5e2C2fx1Xp7rr3YwmJct5X0B22jOPMjctytQuZ5bvmb9emp7A==
-  dependencies:
-    fp-ts "^2.11.6"
-
 emittery@^0.8.1:
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/emittery/-/emittery-0.8.1.tgz#bb23cc86d03b30aa75a7f734819dee2e1ba70860"
